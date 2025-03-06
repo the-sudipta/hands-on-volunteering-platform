@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { LoginDTO } from './user.dto';
 import { MapperService } from './mapper.service';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+
 // import { instanceToPlain } from 'class-transformer';
 import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
@@ -26,7 +26,7 @@ export class UserService {
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
 
-    private mailerService: MailerService,
+
     private mapperService: MapperService,
     private jwtService: JwtService,
   ) {}
