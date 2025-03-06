@@ -1,29 +1,24 @@
 import { Module } from '@nestjs/common';
-// import { SellerController } from './seller.controller';
-// import { SellerService } from './seller.service';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { AddressEntity, BookEntity, FeedbackEntity, OrderEntity, PinCodeEntity, SellerCustomerBookEntity, SellerEntity } from './seller.entity';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { UserEntity } from './user.entity';
-// import { CustomerEntity } from 'src/moderator/moderator.entity';
+import { OtpEntity, SessionEntity, UserEntity } from './user.entity';
+import { MapperService } from './mapper.service';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { TokenBlacklistService } from './auth/token_blacklist.service';
+import { UserService } from './user.service';
+import { UserController } from './user.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.gmail.com',
-        port: 465,
-        ignoreTLS: true,
-        secure: true,
-        auth: {
-          user: 'SMTP_MAILER_ID_HERE',
-          pass: 'MAILER_SERVICE_USABLE_PASSWORD_HERE',
-        },
-      },
+    TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity]),
+    JwtModule.register({
+      global: true,
+      secret: 'mySecretKey123!@#',
+      signOptions: { expiresIn: '30m' },
     }),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [UserController],
+  providers: [UserService, MapperService, JwtService, TokenBlacklistService],
+  exports: [UserService], // If you don't add this, it will provide an error
 })
 export class UserModule {}

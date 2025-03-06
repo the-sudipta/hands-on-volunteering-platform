@@ -2,21 +2,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  JoinColumn,
+  ManyToOne,
+  OneToMany,
   OneToOne,
-  // OneToOne,
-  // JoinColumn,
-  // ManyToOne,
-  // OneToMany,
-  // OneToOne,
-  // JoinColumn,
+  JoinColumn,
 } from 'typeorm';
 
-/**
- * USER TABLE
- * - Each user can create multiple events
- * - Each user can create multiple help requests
- */
 @Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -29,13 +20,15 @@ export class UserEntity {
   password: string;
 
   @Column()
-  role: string; // 'admin' | 'volunteer'
+  role: string;
+
+  @OneToMany(() => SessionEntity, (session) => session.user)
+  sessions: SessionEntity[];
+
+  @OneToMany(() => OtpEntity, (otp) => otp.user)
+  otp: OtpEntity[];
 }
 
-/**
- * PROFILE TABLE
- * - Each user has one profile (One-to-One Relationship)
- */
 @Entity('profile')
 export class ProfileEntity {
   @PrimaryGeneratedColumn()
@@ -45,21 +38,47 @@ export class ProfileEntity {
   name: string;
 
   @Column()
-  age: number;
+  nid: string;
 
-  @Column()
-  gender: string;
-
+  // @Column({ unique: true })
   @Column()
   phone: string;
 
-  @Column()
-  address: string;
-
-  @Column({ unique: true })
-  nid: string;
-
   @OneToOne(() => UserEntity)
   @JoinColumn()
+  user: UserEntity;
+}
+
+@Entity('session')
+export class SessionEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  // @Column()
+  // user_id: number;
+
+  @Column()
+  jwt_token: string;
+
+  @Column()
+  expiration_date: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.sessions)
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity;
+}
+
+@Entity('otp')
+export class OtpEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  otp: string;
+
+  @Column({ nullable: true })
+  expiration_date: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.otp)
   user: UserEntity;
 }
