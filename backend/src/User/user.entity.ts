@@ -2,6 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  JoinColumn,
+  OneToOne,
   // OneToOne,
   // JoinColumn,
   // ManyToOne,
@@ -56,4 +58,8 @@ export class ProfileEntity {
 
   @Column({ unique: true })
   nid: string;
+
+  @OneToOne(() => UserEntity)
+  @JoinColumn()
+  user: UserEntity;
 }
