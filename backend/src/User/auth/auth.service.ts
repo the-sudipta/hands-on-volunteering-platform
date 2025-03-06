@@ -20,5 +20,10 @@ export class AuthService {
     private tokenBlacklistService: TokenBlacklistService,
   ) {}
 
+  async signUp(myObj: LoginDTO): Promise<any> {
+    return await this.userService.Create_Signup(myObj);
+  }
+
+
 
 }

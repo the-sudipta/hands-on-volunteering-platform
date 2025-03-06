@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OtpEntity, SessionEntity, UserEntity } from './user.entity';
+import { OtpEntity, ProfileEntity, SessionEntity, UserEntity } from './user.entity';
 import { MapperService } from './mapper.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TokenBlacklistService } from './auth/token_blacklist.service';
@@ -10,7 +10,7 @@ import { UserController } from './user.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity]),
+    TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity, ProfileEntity]),
     JwtModule.register({
       global: true,
       secret: 'mySecretKey123!@#',

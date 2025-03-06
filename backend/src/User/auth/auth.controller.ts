@@ -31,5 +31,31 @@ export class AuthController {
     return 'Relax! User Auth is working.';
   }
 
+  @Post('/signup')
+  // @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Signup(@Body() signup_info: LoginDTO): Promise<any> {
+    try {
+      signup_info.password = await bcrypt.hash(signup_info.password, 12);
+
+      const user_id = await this.authService.signUp(signup_info);
+      if (user_id < 0) {
+        throw new BadRequestException({
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email Already Exists',
+        });
+      } else {
+        return user_id;
+      }
+    } catch (e) {
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        message: e.message,
+      });
+    }
+  }
+
+
+
 
 }
