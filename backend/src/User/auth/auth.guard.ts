@@ -17,8 +17,29 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+    if (!token) {
+      throw new UnauthorizedException("JWT token not found");
+      //  Token Already destroyed
+    }
+    try {
+      const isBlacklisted =
+        await this.token_blacklistService.isTokenBlacklisted(token);
+      if (isBlacklisted) {
+        throw new UnauthorizedException("JWT token is blacklisted");
+      }
 
-    return false;
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+      request["user"] = payload;
+    } catch (e) {
+      //   Not the real user, Destroy the token
+      request["user"] = null;
+      throw new UnauthorizedException(e.message);
+    }
+    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

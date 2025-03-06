@@ -58,17 +58,17 @@ export class UserController {
   @Post('/signup/user_details')
   @UsePipes(new ValidationPipe())
   @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
-  async customer_Details_Create(
+  async user_Details_Create(
     @Body() user_info: UserDto,
   ): Promise<any> {
     try {
-      const saved_customer =
+      const saved_user =
         await this.userService.Create_UserProfile(user_info);
-      if (saved_customer > 0) {
-        return saved_customer;
+      if (saved_user > 0) {
+        return saved_user;
       } else {
         throw new InternalServerErrorException(
-          'customer data could not be saved',
+          'User data could not be saved',
         );
       }
     } catch (e) {

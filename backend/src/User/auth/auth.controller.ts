@@ -55,6 +55,13 @@ export class AuthController {
     }
   }
 
+  @Post('/login')
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  @UsePipes(new ValidationPipe())
+  async Login(@Body() login_info: LoginDTO): Promise<any> {
+    return await this.authService.signIn(login_info);
+  }
+
 
 
 
