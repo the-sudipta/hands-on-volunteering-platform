@@ -1,0 +1,15 @@
+| Variable Name        | Value
+|----------------------|---------------------------------------------------|
+| DATABASE_PUBLIC_URL  | postgresql://postgres:lpWlAcSdMpMXKvCpnJmGacKswsbpwZBG@ballast.proxy.rlwy.net:56158/railway
+| PUBLIC_URL_Structure | postgresql://username:password@host:port/database_name
+| DATABASE_URL         | postgresql://postgres:1pWlAcSdMpMXKvCpnJmGacKs
+| PGDATA               | /var/lib/postgresql/data/pgdata
+| PGDATABASE           | railway
+| PGHOST               | postgres.railway.internal
+| PGPASSWORD           | 1pWlAcSdMpMXKvCpnJmGacKswsbpwZBG
+| PGPORT               | 5432
+| PGUSER               | postgres
+| POSTGRES_DB          | railway
+| POSTGRES_PASSWORD    | 1pWlAcSdMpMXKvCpnJmGacKswsbpwZBG
+| POSTGRES_USER        | postgres
+| SSL_CERT_DAYS        | 820
