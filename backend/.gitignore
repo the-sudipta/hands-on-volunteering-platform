@@ -1,0 +1,40 @@
+# Node modules
+/node_modules/
+
+# Build output
+/dist/
+/build/
+
+# Dependency directories
+/.pnp/
+/.pnp.js
+
+# TypeScript build cache
+/.cache/
+/*.tsbuildinfo
+
+# NestJS specific files
+/.nestjs/
+
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE files
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Prettier, eslint, and other editor config files
+*.eslintcache
+*.prettierconfig.js
+*.prettierrc
+
+# JetBrains files
+*.iml
