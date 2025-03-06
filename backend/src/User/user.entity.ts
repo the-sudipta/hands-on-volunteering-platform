@@ -2,6 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  // OneToOne,
+  // JoinColumn,
   // ManyToOne,
   // OneToMany,
   // OneToOne,
@@ -26,4 +28,32 @@ export class UserEntity {
 
   @Column()
   role: string; // 'admin' | 'volunteer'
+}
+
+/**
+ * PROFILE TABLE
+ * - Each user has one profile (One-to-One Relationship)
+ */
+@Entity('profile')
+export class ProfileEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  age: number;
+
+  @Column()
+  gender: string;
+
+  @Column()
+  phone: string;
+
+  @Column()
+  address: string;
+
+  @Column({ unique: true })
+  nid: string;
 }
