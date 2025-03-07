@@ -7,6 +7,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TokenBlacklistService } from './auth/token_blacklist.service';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [

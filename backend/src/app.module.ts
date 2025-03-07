@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './User/user.module';
 import { AuthModule } from './User/auth/auth.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -22,6 +23,22 @@ import { AuthModule } from './User/auth/auth.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.MAILER_HOST, // SMTP relay host
+        port: parseInt(process.env.MAILER_PORT || '587', 10), // Port for TLS (STARTTLS)
+        secure: false, // ✅ Must be false for STARTTLS on port 587
+        auth: {
+          user: process.env.MAILER_USER, // SMTP username
+          pass: process.env.MAILER_PASSWORD, // SMTP password
+        },
+      },
+      defaults: {
+        from: `"VolunteerConnect" <${process.env.MAILER_USER}>`, // ✅ Explicitly set "from" email
+      },
+    }),
+
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { LoginDTO, UserDto } from './user.dto';
 import { MapperService } from './mapper.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 // import { instanceToPlain } from 'class-transformer';
 import { Request } from 'express';
@@ -31,6 +32,7 @@ export class UserService {
     private otpRepository: Repository<OtpEntity>,
 
 
+    private mailerService: MailerService,
     private mapperService: MapperService,
     private jwtService: JwtService,
   ) {}
@@ -113,6 +115,95 @@ export class UserService {
       return saved_data.id > 0;
     } catch (e) {
       throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  async Update_Password(req: Request, password: string): Promise<any> {
+    try {
+      const user = await this.get_user_from_Request(req);
+      console.log('Update Password header Request  user email = ' + user.email);
+      const update = await this.userRepository.update(user.id, {
+        password: password,
+      });
+      console.log("Update result:", update);
+      return update.affected;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Update Password User Service error = ' + e.message,
+      );
+    }
+  }
+
+
+  async ForgetPassword(email: string) {
+    try {
+      const user = await this.userRepository.findOneBy({ email: email });
+      if (user != null) {
+        //   Generate OTP
+        const OTP = await this.Generate_OTP();
+        const user_has_pin = await this.otpRepository.findOneBy({ user: user });
+        if (user_has_pin) {
+          console.log('Okay, Already have OTP. Needs to be updated');
+          await this.otpRepository.update(user_has_pin.id, { otp: OTP });
+          const user_has_pin_updated = await this.otpRepository.findOneBy({
+            user: user,
+          });
+          console.log('Updated OTP = ' + (user_has_pin_updated?.otp ?? 'N/A'));
+        } else {
+          const new_otp = new OtpEntity();
+          new_otp.id = -1;
+          new_otp.otp = OTP;
+          new_otp.user = user;
+          const saved_data = await this.otpRepository.save(new_otp);
+          console.log('New OTP = ' + saved_data.otp);
+        }
+
+        //   Send the OTP through email
+        const body =
+          (await process.env.EMAIL_BODY_P1) + OTP + process.env.EMAIL_BODY_P2;
+        await this.Send_Email(email, process.env.EMAIL_SUBJECT as string, body);
+        const new_token = await new LoginDTO();
+        new_token.email = email;
+        new_token.password = 'temp';
+        console.log('Email Sending Done');
+        return await this.create_token(new_token);
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Forget Password Service Error = ' + e.message,
+      );
+    }
+  }
+
+  async otp_verification(req: Request, otp: string): Promise<any> {
+    try {
+      // Get the user by the email
+      const user = await this.get_user_from_Request(req);
+      console.log('Got the user = ' + user.email);
+      //   Get the saved otp for the user
+      const saved_otp_row_for_user = await this.otpRepository.findOneBy({
+        user: user,
+      });
+      console.log('User provided otp = ' + otp);
+      console.log('Saved OTP = ' + (saved_otp_row_for_user?.otp ?? 'N/A'));
+
+      if (!saved_otp_row_for_user) {
+        throw new Error('Failed to save OTP. Entry not found.');
+      }
+      if (saved_otp_row_for_user.otp === otp) {
+        console.log('OTP Matched! Changing the OTP Expiration Date');
+        const current_time = await this.get_current_timestamp();
+        const decision = await this.otpRepository.update(saved_otp_row_for_user.id, { expiration_date: current_time });
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'OTP verification service error = ' + e.message,
+      );
     }
   }
 
@@ -202,6 +293,52 @@ export class UserService {
         'Get user from request User service error = ' + e.message,
       );
     }
+  }
+
+  async Send_Email(
+    emailTo: string,
+    emailSubject: string,
+    emailBody: string,
+  ): Promise<any> {
+    try {
+      return await this.mailerService.sendMail({
+        to: emailTo,
+        subject: emailSubject,
+        text: emailBody,
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  async Generate_OTP(): Promise<any> {
+    return (Math.floor(Math.random() * 900000) + 100000).toString();
+  }
+
+  async updateUser_SingleInfo(id: number, column: string, data: any) {
+    const updateData = {};
+    updateData[column] = data;
+
+    await this.userRepository.update(id, updateData);
+  }
+
+  async user_validity(email: string, password: string): Promise<boolean> {
+    try {
+      const saved_user = await this.userRepository.findOneBy({ email: email });
+      if (!saved_user) {
+        return false; // User not found, return false
+      }
+
+      return await bcrypt.compare(password, saved_user.password);
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'User Service, user validity Error = ' + e.message,
+      );
+    }
+  }
+
+  async get_current_timestamp(): Promise<string> {
+    return new Date().toISOString();
   }
 
   //endregion Supportive Functions

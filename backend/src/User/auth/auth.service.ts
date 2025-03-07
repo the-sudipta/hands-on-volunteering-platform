@@ -64,6 +64,24 @@ export class AuthService {
     }
   }
 
+  async UpdatePassword(req: Request, password: string): Promise<any> {
+    try {
+      const decision = await this.userService.Update_Password(
+        req,
+        password,
+      );
+      if (decision !== null) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Update Password Auth Service error = ' + e.message,
+      );
+    }
+  }
+
 
 
 
