@@ -117,6 +117,8 @@ export class UserService {
   }
 
 
+  
+
   //region JWT Functionalities
 
   async addToBlacklist(
@@ -126,11 +128,10 @@ export class UserService {
   ): Promise<any> {
     try {
       const user = await this.userRepository.findOneBy({ email: email });
-      const session = new SessionEntity();
-      session.jwt_token = token;
-      session.expiration_date = date_time;
-      session.user = user as UserEntity;
-      const saved_data = await this.sessionRepository.save(session);
+
+      const current_session = await this.sessionRepository.findOneBy({jwt_token : token}) as SessionEntity;
+      current_session.expiration_date = date_time;
+      const saved_data = await this.sessionRepository.save(current_session);
       return saved_data.id > 0;
     } catch (e) {
       throw new InternalServerErrorException(e.message);

@@ -62,6 +62,24 @@ export class AuthController {
     return await this.authService.signIn(login_info);
   }
 
+  @Get('/logout')
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  async Logout(@Request() req): Promise<any> {
+    try {
+      const token = await this.authService.extractTokenFromHeader(req);
+      if (token != null && token != '') {
+        return await this.authService.logout(req.user.email, token);
+      } else {
+        throw new BadRequestException(
+          'Please provide the token inside header, along with the request',
+        );
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
 
 
 

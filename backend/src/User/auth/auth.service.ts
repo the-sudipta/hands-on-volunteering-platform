@@ -44,6 +44,26 @@ export class AuthService {
     };
   }
 
+  async logout(email: string, token: string): Promise<any> {
+    try {
+      // Blacklist the token
+      const decision = await this.tokenBlacklistService.addToBlacklist(
+        email,
+        token,
+      );
+
+      if (decision != null) {
+        return decision;
+      } else {
+        throw new InternalServerErrorException(
+          'Problem in Token Blacklist Service',
+        );
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
 
 
 
@@ -80,6 +100,14 @@ export class AuthService {
   }
 
   //endregion JWT Functionalities
+
+  //region Supporting Functions
+
+
+
+
+
+  //endregion Supporting Functions
 
 
 

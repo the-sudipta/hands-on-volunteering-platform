@@ -29,8 +29,11 @@ export class TokenBlacklistService {
   }
 
   async isTokenBlacklisted(token: string): Promise<boolean> {
-    // return this.blacklistedTokens.has(token);
+    // Fetch token details from the database
     const data = await this.userService.get_token_by_token(token);
-    return !!data;
+
+    // Check if the expiration_date is NOT null
+    return data?.expiration_date !== null;
   }
+
 }
