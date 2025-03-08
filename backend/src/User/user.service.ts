@@ -1,13 +1,17 @@
 import {
-  // BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OtpEntity, ProfileEntity, SessionEntity, UserEntity } from './user.entity';
+import {
+  OtpEntity,
+  ProfileEntity,
+  SessionEntity,
+  UserEntity,
+} from './user.entity';
 import { Repository } from 'typeorm';
-import { LoginDTO, UserDto } from './user.dto';
+import { LoginDTO, User_ProfileDTO, UserDto } from './user.dto';
 import { MapperService } from './mapper.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -16,6 +20,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import { instanceToPlain } from 'class-transformer';
+
 // import { User_ProfileDTO, UserDto } from './user.dto';
 
 @Injectable()
@@ -31,7 +36,6 @@ export class UserService {
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
 
-
     private mailerService: MailerService,
     private mapperService: MapperService,
     private jwtService: JwtService,
@@ -40,7 +44,6 @@ export class UserService {
   get_service(): string {
     return 'UserService is working!';
   }
-
 
   async Create_Signup(signup_info: LoginDTO): Promise<any> {
     const user = this.mapperService.dtoToEntity(signup_info, UserEntity);
@@ -76,8 +79,7 @@ export class UserService {
       });
 
       if (nid_existence == null) {
-        const saved_user =
-          await this.profileRepository.save(profileEntity);
+        const saved_user = await this.profileRepository.save(profileEntity);
         return saved_user ? saved_user.id : -1;
       } else {
         throw new InternalServerErrorException('NID Already exists');
@@ -104,14 +106,18 @@ export class UserService {
     }
   }
 
-  async Create_Session(token:string, loginDTO:LoginDTO) : Promise<boolean> {
+  async Create_Session(token: string, loginDTO: LoginDTO): Promise<boolean> {
     try {
-      const user = await this.userRepository.findOneBy({ email: loginDTO.email }) as UserEntity;
+      const user = (await this.userRepository.findOneBy({
+        email: loginDTO.email,
+      })) as UserEntity;
       const session = new SessionEntity();
       session.jwt_token = token;
       session.expiration_date = null;
       session.user = user as UserEntity;
-      const saved_data = await this.sessionRepository.save(session) as SessionEntity;
+      const saved_data = (await this.sessionRepository.save(
+        session,
+      )) as SessionEntity;
       return saved_data.id > 0;
     } catch (e) {
       throw new InternalServerErrorException(e.message);
@@ -125,7 +131,7 @@ export class UserService {
       const update = await this.userRepository.update(user.id, {
         password: password,
       });
-      console.log("Update result:", update);
+      console.log('Update result:', update);
       return update.affected;
     } catch (e) {
       throw new InternalServerErrorException(
@@ -133,7 +139,6 @@ export class UserService {
       );
     }
   }
-
 
   async ForgetPassword(email: string) {
     try {
@@ -195,7 +200,10 @@ export class UserService {
       if (saved_otp_row_for_user.otp === otp) {
         console.log('OTP Matched! Changing the OTP Expiration Date');
         const current_time = await this.get_current_timestamp();
-        const decision = await this.otpRepository.update(saved_otp_row_for_user.id, { expiration_date: current_time });
+        const decision = await this.otpRepository.update(
+          saved_otp_row_for_user.id,
+          { expiration_date: current_time },
+        );
         return true;
       } else {
         return false;
@@ -207,8 +215,65 @@ export class UserService {
     }
   }
 
+  async Update_Own_Profile_Details(
+    email: string,
+    updated_data: User_ProfileDTO,
+  ): Promise<any> {
+    try {
+      const previous_data = await this.Find_User_Profile_By_Email(email);
+      const previous_user = await this.userRepository.findOneBy({
+        email: email,
+      }) as UserEntity;
 
-  
+      // If email Got Updated
+      if (
+        previous_data.email != updated_data.email &&
+        updated_data.email != null &&
+        updated_data.email != ''
+      ) {
+        await this.userRepository.update(previous_data.id, {
+          email: updated_data.email,
+        });
+      }
+
+      //   If name Got Updated
+      if (
+        previous_data.name != updated_data.name &&
+        updated_data.name != null &&
+        updated_data.name != ''
+      ) {
+        await this.profileRepository.update(previous_user.id, {
+          name: updated_data.name,
+        });
+      }
+
+      //   If nid Got Updated
+      if (
+        previous_data.nid != updated_data.nid &&
+        updated_data.nid != null &&
+        updated_data.nid != ''
+      ) {
+        await this.profileRepository.update(previous_user.id, {
+          nid: updated_data.nid,
+        });
+      }
+
+      //   If phone Got Updated
+      if (
+        previous_data.phone != updated_data.phone &&
+        updated_data.phone != null &&
+        updated_data.phone != ''
+      ) {
+        await this.profileRepository.update(previous_user.id, {
+          phone: updated_data.phone,
+        });
+      }
+
+      return updated_data;
+    } catch (e) {
+      return new InternalServerErrorException(e.message);
+    }
+  }
 
   //region JWT Functionalities
 
@@ -220,7 +285,9 @@ export class UserService {
     try {
       const user = await this.userRepository.findOneBy({ email: email });
 
-      const current_session = await this.sessionRepository.findOneBy({jwt_token : token}) as SessionEntity;
+      const current_session = (await this.sessionRepository.findOneBy({
+        jwt_token: token,
+      })) as SessionEntity;
       current_session.expiration_date = date_time;
       const saved_data = await this.sessionRepository.save(current_session);
       return saved_data.id > 0;
@@ -277,17 +344,16 @@ export class UserService {
 
   //endregion JWT Functionalities
 
-
   //region Supportive Functions
 
   async get_user_from_Request(req: Request): Promise<UserEntity> {
     try {
-      const token = await this.extractTokenFromHeader(req) as string;
+      const token = (await this.extractTokenFromHeader(req)) as string;
       const decoded_object_login_dto = await this.decode_token(token);
       // Get the user by the email
-      return await this.userRepository.findOneBy({
+      return (await this.userRepository.findOneBy({
         email: decoded_object_login_dto.email,
-      }) as UserEntity;
+      })) as UserEntity;
     } catch (e) {
       throw new InternalServerErrorException(
         'Get user from request User service error = ' + e.message,
@@ -341,6 +407,16 @@ export class UserService {
     return new Date().toISOString();
   }
 
-  //endregion Supportive Functions
+  async Find_User_Profile_By_Email(email: string): Promise<any> {
+    const user_data = await this.userRepository.findOneBy({ email: email });
 
+    if (!user_data) {
+      throw new Error('User data is null. Cannot fetch profile.');
+    }
+    //   Convert to customer Profile
+
+    return await this.profileRepository.findOneBy({ user: user_data });
+  }
+
+  //endregion Supportive Functions
 }

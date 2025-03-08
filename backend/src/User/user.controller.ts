@@ -130,6 +130,25 @@ export class UserController {
   }
 
 
+  @Put('/profile/update')
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Update_own_Profile(
+    @Request() req,
+    @Body() updated_data: User_ProfileDTO,
+  ): Promise<any> {
+    try {
+      return await this.userService.Update_Own_Profile_Details(
+        req.user.email,
+        updated_data,
+      );
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
+
 
 
 
