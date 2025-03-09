@@ -101,7 +101,10 @@ export class AuthController {
         new_Password_Object_DTO.password,
       );
       if (result) {
-        return true;
+        return {
+          "success": true,
+          "message": "Password Updated Successfully",
+        };
       } else {
         return new InternalServerErrorException('Customer Service issue = ');
       }
@@ -110,8 +113,12 @@ export class AuthController {
         'Change Password Auth Controller error = ' + e.message,
       );
     } finally {
-      //   Destroy the JWT
-      return await this.authService.destroy_temporary_JWT(req);
+      try {
+        await this.authService.destroy_temporary_JWT(req);
+      } catch (error) {
+        console.error('Error destroying temporary JWT:', error.message);
+        // Do not throw error here; just log it to avoid overwriting the response.
+      }
     }
   }
 

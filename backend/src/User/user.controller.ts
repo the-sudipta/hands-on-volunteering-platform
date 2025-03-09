@@ -139,10 +139,25 @@ export class UserController {
     @Body() updated_data: User_ProfileDTO,
   ): Promise<any> {
     try {
-      return await this.userService.Update_Own_Profile_Details(
+      const update_decision = await this.userService.Update_Own_Profile_Details(
         req.user.email,
         updated_data,
       );
+      return {
+        success: true,
+        message: 'Password updated successfully',
+      };
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  @Get('/profile')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Show_own_Profile(@Request() req): Promise<any> {
+    try {
+      return await this.userService.Show_My_Profile_Details(req.user.email);
     } catch (e) {
       throw new InternalServerErrorException(e.message);
     }

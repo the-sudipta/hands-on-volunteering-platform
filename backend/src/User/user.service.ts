@@ -165,7 +165,7 @@ export class UserService {
 
         //   Send the OTP through email
         const body =
-          (await process.env.EMAIL_BODY_P1) + OTP + process.env.EMAIL_BODY_P2;
+          (await process.env.EMAIL_BODY_P1) + OTP + (await process.env.EMAIL_BODY_P2);
         await this.Send_Email(email, process.env.EMAIL_SUBJECT as string, body);
         const new_token = await new LoginDTO();
         new_token.email = email;
@@ -200,11 +200,9 @@ export class UserService {
       if (saved_otp_row_for_user.otp === otp) {
         console.log('OTP Matched! Changing the OTP Expiration Date');
         const current_time = await this.get_current_timestamp();
-        const decision = await this.otpRepository.update(
-          saved_otp_row_for_user.id,
-          { expiration_date: current_time },
-        );
-        return true;
+        saved_otp_row_for_user.expiration_date = current_time;
+        const updated_otp_row = await this.otpRepository.save(saved_otp_row_for_user);
+        return updated_otp_row.expiration_date === current_time;
       } else {
         return false;
       }
@@ -220,59 +218,44 @@ export class UserService {
     updated_data: User_ProfileDTO,
   ): Promise<any> {
     try {
-      const previous_data = await this.Find_User_Profile_By_Email(email);
-      const previous_user = await this.userRepository.findOneBy({
+      const previous_data = await this.get_user_profile_by_email(email);
+      const previous_user = (await this.userRepository.findOneBy({
         email: email,
-      }) as UserEntity;
+      })) as UserEntity;
 
-      // If email Got Updated
-      if (
-        previous_data.email != updated_data.email &&
-        updated_data.email != null &&
-        updated_data.email != ''
-      ) {
-        await this.userRepository.update(previous_data.id, {
-          email: updated_data.email,
-        });
+      previous_data.name = updated_data.name;
+      previous_data.email = updated_data.email;
+      previous_data.nid = updated_data.nid;
+      previous_data.phone = updated_data.phone;
+
+      const decision = await this.profileRepository.save(previous_data);
+
+      if (decision != null) {
+
+        return updated_data;
+      }else {
+        return new InternalServerErrorException('Sorry, the data could not be updated');
       }
-
-      //   If name Got Updated
-      if (
-        previous_data.name != updated_data.name &&
-        updated_data.name != null &&
-        updated_data.name != ''
-      ) {
-        await this.profileRepository.update(previous_user.id, {
-          name: updated_data.name,
-        });
-      }
-
-      //   If nid Got Updated
-      if (
-        previous_data.nid != updated_data.nid &&
-        updated_data.nid != null &&
-        updated_data.nid != ''
-      ) {
-        await this.profileRepository.update(previous_user.id, {
-          nid: updated_data.nid,
-        });
-      }
-
-      //   If phone Got Updated
-      if (
-        previous_data.phone != updated_data.phone &&
-        updated_data.phone != null &&
-        updated_data.phone != ''
-      ) {
-        await this.profileRepository.update(previous_user.id, {
-          phone: updated_data.phone,
-        });
-      }
-
-      return updated_data;
     } catch (e) {
       return new InternalServerErrorException(e.message);
     }
+  }
+
+  async Show_My_Profile_Details(email: string): Promise<User_ProfileDTO> {
+    const user = await this.get_user_from_email(email);
+    console.log('Got the user = ' + user.email);
+    const profile_details = await this.profileRepository.findOneBy({
+      user: user
+    });
+    if (!profile_details) {
+      throw new InternalServerErrorException(
+        'Can not fetch profile details for the current user',
+      );
+    }
+    return (await this.mapperService.entityToDto(
+      profile_details,
+      User_ProfileDTO,
+    ));
   }
 
   //region JWT Functionalities
@@ -296,7 +279,9 @@ export class UserService {
     }
   }
 
-  async get_token_by_token(token: string): Promise<any> {
+
+
+  async get_token_row_by_token(token: string): Promise<any> {
     try {
       return await this.sessionRepository.findOneBy({ jwt_token: token });
     } catch (e) {
@@ -321,25 +306,20 @@ export class UserService {
 
   async decode_token(token: string): Promise<any> {
     try {
+      console.log('Decoding The Token');
       const decoded = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_CUSTOM_SECRET,
-      });
+      }) ;
       return decoded;
     } catch (error) {
       // Handle decoding error
-      throw new Error('Failed to decode token');
+      throw new Error('Failed to decode token. Error = ',error.message);
     }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    try {
-      const [type, token] = request.headers.authorization?.split(' ') ?? [];
-      return type === 'Bearer' ? token : undefined;
-    } catch (e) {
-      throw new InternalServerErrorException(
-        'extract Token From Header User service error = ' + e.message,
-      );
-    }
+    const [type, token] = request.headers.authorization?.split(" ") ?? [];
+    return type === "Bearer" ? token : undefined;
   }
 
   //endregion JWT Functionalities
@@ -351,14 +331,19 @@ export class UserService {
       const token = (await this.extractTokenFromHeader(req)) as string;
       const decoded_object_login_dto = await this.decode_token(token);
       // Get the user by the email
+      console.log('Retrieved Email = '+decoded_object_login_dto.email);
       return (await this.userRepository.findOneBy({
         email: decoded_object_login_dto.email,
       })) as UserEntity;
     } catch (e) {
       throw new InternalServerErrorException(
-        'Get user from request User service error = ' + e.message,
+        'Get user from request, User service error = ' + e.message,
       );
     }
+  }
+
+  async get_user_from_email(email: string): Promise<UserEntity> {
+    return await this.userRepository.findOneBy({email: email}) as UserEntity;
   }
 
   async Send_Email(
@@ -407,7 +392,7 @@ export class UserService {
     return new Date().toISOString();
   }
 
-  async Find_User_Profile_By_Email(email: string): Promise<any> {
+  async get_user_profile_by_email(email: string): Promise<any> {
     const user_data = await this.userRepository.findOneBy({ email: email });
 
     if (!user_data) {

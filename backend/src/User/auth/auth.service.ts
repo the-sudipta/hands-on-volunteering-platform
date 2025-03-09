@@ -70,7 +70,7 @@ export class AuthService {
         req,
         password,
       );
-      if (decision !== null) {
+      if (decision > 0) {
         return true;
       } else {
         return false;
@@ -81,8 +81,6 @@ export class AuthService {
       );
     }
   }
-
-
 
 
 
@@ -98,19 +96,18 @@ export class AuthService {
       const token = await this.extractTokenFromHeader(req) as string;
 
       const user = await this.userService.get_user_from_Request(req) as any;
+      console.log('AuthService, destroy_temporary_JWT User Email = ', user.email);
 
+      console.log('Starting of JWT Token Black Listing');
       // Blacklist the token
-      const decision = await this.tokenBlacklistService.addToBlacklist(
-        user.email,
-        token,
-      );
+      const decision = await this.tokenBlacklistService.blacklistTemporaryJWT(token,);
 
-      if (decision != null) {
+      console.log('decision of JWT Token Black Listing = ',decision);
+
+      if (decision) {
         return decision;
       } else {
-        throw new InternalServerErrorException(
-          'Problem in Token Blacklist Service',
-        );
+        throw new InternalServerErrorException(`Failed to destroy temporary token = ${token}`);
       }
     } catch (e) {
       throw new InternalServerErrorException(e.message);

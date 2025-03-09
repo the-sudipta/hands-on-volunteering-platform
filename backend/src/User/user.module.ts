@@ -14,7 +14,7 @@ import { MailerService } from '@nestjs-modules/mailer';
     TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity, ProfileEntity]),
     JwtModule.register({
       global: true,
-      secret: 'mySecretKey123!@#',
+      secret: process.env.JWT_CUSTOM_SECRET,
       signOptions: { expiresIn: '30m' },
     }),
   ],
