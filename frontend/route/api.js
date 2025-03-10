@@ -9,6 +9,7 @@ const API_ENDPOINTS = {
     userSignupDetails: "/api/user/signup/user_details",
     userProfile: "/api/user/profile",
     userProfileUpdate: "/api/user/profile/update",
+    userForgetPassword: "/api/user/forget_password",
     userOTP: "/api/user/otp",
     navbarInfo: "/api/user/navbar_info",
 };

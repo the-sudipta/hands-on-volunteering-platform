@@ -108,12 +108,15 @@ export class UserController {
     @Body() OTP_Object: OTP_ReceiverDTO,
   ): Promise<any> {
     // console.log('Request Headers:', req.headers);
+    console.log('Received OTP in Controller = ',OTP_Object.otp);
+    console.log('Received Req in Controller = ',req);
     try {
       // console.log('User provided otp = ' + OTP_Object.otp);
       const decision = await this.userService.otp_verification(
         req,
         OTP_Object.otp,
       );
+
       if (decision) {
         console.log('Returning True');
         return {

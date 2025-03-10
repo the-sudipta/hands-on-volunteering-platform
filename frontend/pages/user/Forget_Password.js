@@ -7,9 +7,16 @@ import Success_Alert from "@/pages/components/toast/Success_Alert";
 import Error_Alert from "@/pages/components/toast/Error_Alert";
 import API_ENDPOINTS from "@/route/api";
 import {useAuth} from "@/pages/utils/authcontext";
+import {Core_Functions} from "@/pages/utils/core_functions";
 
 export default function Forget_Password() {
     const router = useRouter();
+    const {  validateAndSubmit } = Core_Functions.useFormValidation();
+    const { login, user } = useAuth();
+
+
+
+    //region Core Variables
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -19,25 +26,38 @@ export default function Forget_Password() {
     const [Show_Success_Alert, setShow_Success_Alert] = useState(false);
     const [Show_Error_Alert, setShow_Error_Alert] = useState(false);
 
-    const [Email_Error, setEmail_Error] = useState('');
-
-    const [terms_condition_decision, setTerms_condition_decision] = useState(false);
-
-    const { login, user } = useAuth();
-
-
-
-    const [forgetPasswordData, setForgetPasswordData] = useState({
+    const [formData, setFormData] = useState({
         email: '',
     });
 
+    const [errors, setErrors] = useState({
+        email_error: '',
+    });
+
+    //endregion Core Variables
+
+    const [terms_condition_decision, setTerms_condition_decision] = useState(false);
+
+
+
+    //region Core Functions Per Page
+
+    // Function to handle changes in email and password inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForgetPasswordData(prevData => ({
+        setFormData(prevData => ({
             ...prevData,
-            [name]: value
+            [name]: value,
         }));
     };
+
+    const handleErrors = (field, message) => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [field]: message,
+        }));
+    };
+
 
     const show_Error = (message) => {
         setShow_Error_Alert(true);
@@ -59,90 +79,74 @@ export default function Forget_Password() {
         }, 3000); // Hide after 3 seconds
     };
 
+    //endregion Core Functions Per Page
 
-    const validationCheck = async (email, is_terms_condition_checked) => {
-        // Email format validation
-        const isValidEmail = (str) => /\S+@\S+\.\S+/.test(str);
 
-        // Password format validation
 
-        if (!email) {
-            setEmail_Error("Email is required");
-            return false;
-        } else if (!isValidEmail(email)) {
-            setEmail_Error("Email is required in the correct format");
-            return false;
-        }else if (is_terms_condition_checked !== true) {
-            show_Error("Please read & accept the terms and conditions")
-            return false;
-        }
-        // All validation checks passed
-        return true;
-    }
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const decision = await validationCheck(forgetPasswordData.email, terms_condition_decision);
-        // alert('Decision = '+decision);
-        if(decision){
-            try {
 
-                setIsLoading(true);
-                const response = await axios.post(
-                    process.env.NEXT_PUBLIC_API_ENDPOINT + API_ENDPOINTS.customerForgetPassword,
-                    {
-                        email:forgetPasswordData.email,
-                    },
-                    {
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        withCredentials: true,
+        const { isValid, validationErrors } = validateAndSubmit(formData);
+
+        if(terms_condition_decision){
+            if (isValid) {
+                try {
+                    setIsLoading(true);
+                    const response = await Core_Functions.submitForm(API_ENDPOINTS.userForgetPassword, formData);
+                    if (response.data) {
+                        login(await response.data.access_token, document.cookie);
+                        console.log(response.data.access_token);
+                        setIsLoading(false);
+                        show_Success("Email has been sent with OTP successfully");
+                        Core_Functions.navigate(router,routes.otp_verification);
+                    } else {
+                        setIsLoading(false);
+                        show_Error("Failed to sent Email with OTP");
+                        Core_Functions.navigate(router,routes.login);
                     }
-                );
-                const receivedData = response.status;
-                if (response.status === 200) {
-                    login(await response.data.access_token, document.cookie);
+                    console.log("JWT = " + response.data.access_token);
+                } catch (error) {
+                    setIsLoading(false);
+                    let errorMessage = "Forget password failed";
+                    if (error.response && error.response.data) {
+                        errorMessage = error.response.data.message || "An unexpected error occurred";
+                    }
+                    show_Error(errorMessage);
+                    console.warn("Error Sending Forget Password Request", error);
+                    Core_Functions.navigate(router, routes.login);
+                }
+            } else {
+                // Immediately use `validationErrors` instead of relying on state updates
+                const errorEntries = Object.entries(validationErrors);
 
-                    console.log(response.data);
-                    setIsLoading(false);
-                    show_Success("Email verification Successful")
-                    navigate(routes.otp_verification);
-                } else {
-                    setIsLoading(false);
-                    show_Error("Email verification failed");
-                    navigate(routes.forget_password)
+                if (errorEntries.length > 0) {
+                    // Set the **first** error first
+                    show_Error(errorEntries[0][1]);
+
+
                 }
 
-                console.log("Status Code = "+response.status);
-            } catch (error) {
-                setIsLoading(false);
-                navigate(routes.forget_password)
-                show_Error("Email verification failed");
-                console.error("Error Sending Forget_Password -> Email verification Request = "+error);
+                console.log("Form validation failed:", validationErrors);
             }
         }else{
-            // alert("Got Final Error, so in the else section");
+            // Terms and Conditions are not Checked
+            show_Error('Please Check and agree with the Terms & Conditions');
         }
     };
 
-    const navigate = (page) => {
-        router.push(page)
-    }
 
 
 
-
-    useEffect(() => {
-
-    }, []);
 
     return (
         <>
             <section className="bg-black dark:bg-gray-900">
                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <a href="#" className="flex items-center mb-6 text-5xl font-semibold text-white-900 dark:text-white">
-                        <img className="w-12 h-12 mr-2" src="/images/Logo.png" alt="logo" />
-                        Paisa
+                        {/*<img className="w-12 h-12 mr-2" src="/images/Logo.png" alt="logo" />*/}
+                        VolunteerConnects
                     </a>
                     <div className="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
                         <h1 className="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
@@ -155,7 +159,7 @@ export default function Forget_Password() {
                                 <input
                                     type="email"
                                     name="email"
-                                    value={forgetPasswordData.email}
+                                    value={formData.email}
                                     onChange={handleChange}
                                     id="email"
                                     placeholder="name@company.com"
@@ -163,7 +167,7 @@ export default function Forget_Password() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 />
                                 <span className="label-text-alt text-red-600">
-                                    {Email_Error}
+                                    {errors.email_error}
                                 </span>
                             </div>
                             <div className="flex items-start">
@@ -177,10 +181,16 @@ export default function Forget_Password() {
                                     />
                                 </div>
                                 <div className="ml-3 text-sm">
-                                    <label htmlFor="terms" className="font-light text-gray-500 dark:text-gray-300">I accept the <a className="font-medium text-primary-600 hover:underline dark:text-primary-500" href="/pdf/Online_Banking_Management_System___Terms___Conditions.pdf" target="_blank" rel="noopener noreferrer">Terms and Conditions</a></label>
+                                    <label htmlFor="terms" className="font-light text-gray-500 dark:text-gray-300">I accept the <a className="font-medium text-primary-600 hover:underline dark:text-primary-500" href="/pdf/VolunteerConnects___Terms___Conditions.pdf" target="_blank" rel="noopener noreferrer">Terms and Conditions</a></label>
                                 </div>
                             </div>
-                            <button type="submit" className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Reset password</button>
+                            <button
+                                type="submit"
+                                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                style={{ border: '1px solid white', cursor: 'pointer' }}
+                            >
+                                Reset password
+                            </button>
                         </form>
                     </div>
                     <div id="y" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: '999' }}>

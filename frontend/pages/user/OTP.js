@@ -7,10 +7,14 @@ import API_ENDPOINTS from "@/route/api";
 import Spinner_Indicator from "@/pages/components/loading_indicator/Spinner_Indicator";
 import Success_Alert from "@/pages/components/toast/Success_Alert";
 import Error_Alert from "@/pages/components/toast/Error_Alert";
+import {Core_Functions} from "@/pages/utils/core_functions";
 
 export default function OTP() {
     const router = useRouter();
+    const {  validateAndSubmit } = Core_Functions.useFormValidation();
     const [pinCode, setPinCode] = useState('');
+
+    //region Core Variables
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -20,6 +24,35 @@ export default function OTP() {
     const [Show_Success_Alert, setShow_Success_Alert] = useState(false);
     const [Show_Error_Alert, setShow_Error_Alert] = useState(false);
 
+    const [formData, setFormData] = useState({
+        otp: -1,
+    });
+
+    const [errors, setErrors] = useState({
+        otp_error: '',
+    });
+
+    //endregion Core Variables
+
+
+
+    //region Core Functions Per Page
+
+    // Function to handle changes in email and password inputs
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleErrors = (field, message) => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [field]: message,
+        }));
+    };
 
 
     const show_Error = (message) => {
@@ -42,7 +75,23 @@ export default function OTP() {
         }, 3000); // Hide after 3 seconds
     };
 
-    const handleSubmit = async (e) => {
+    //endregion Core Functions Per Page
+
+    const handlePinEntered = (pinValue) => {
+        console.log("Received OTP:", pinValue); // Debugging log
+        setFormData(prevData => ({
+            ...prevData,
+            otp: pinValue, // Ensure pin is stored as a string
+        }));
+    };
+
+    const handlePinCodeChange = (newPinCode) => {
+        setPinCode(newPinCode);
+        handlePinEntered(newPinCode);
+    };
+
+
+    const handleSubmitX = async (e) => {
 
 
         try {
@@ -61,39 +110,68 @@ export default function OTP() {
             if (response.status === 200) {
                 setIsLoading(false);
                 show_Success("Pin code matched")
-                navigate(routes.new_password);
+                // Core_Functions.navigate(router, routes.new_password);
             } else {
                 setIsLoading(false);
                 show_Error("Pin code did not matched");
-                navigate(routes.forget_password);
+                // Core_Functions.navigate(router, routes.forget_password);
             }
             console.log("Messages = "+response.status);
         } catch (error) {
             setIsLoading(false);
             show_Error("Pin code did not matched");
             console.error("Error Sending Login Request"+error);
-            navigate(routes.forget_password);
+            // Core_Functions.navigate(router, routes.forget_password);
+        }
+
+    };
+
+    const handleSubmit = async (e) => {
+        // e.preventDefault();
+
+        const { isValid, validationErrors } = validateAndSubmit(formData);
+        // alert('Pin code = ' + formData.otp);
+
+        if (isValid) {
+            setIsLoading(true);
+            const response = await Core_Functions.submitForm(API_ENDPOINTS.userOTP, formData);
+            if (response.data) {
+                console.log(response.data);
+                setIsLoading(false);
+                show_Success("OTP matched")
+                Core_Functions.navigate(router,routes.new_password);
+            } else {
+                setIsLoading(false);
+                show_Error("Pin code did not matched");
+            }
+        } else {
+            // Immediately use `validationErrors` instead of relying on state updates
+            const errorEntries = Object.entries(validationErrors);
+
+            if (errorEntries.length > 0) {
+                // Set the **first** error first
+                show_Error(errorEntries[0][1]);
+
+
+            }
+
+            console.log("Form validation failed:", validationErrors);
         }
 
     };
 
 
 
-    const handlePinCodeChange = (newPinCode) => {
-        setPinCode(newPinCode);
-    };
+
 
 
     useEffect(() => {
         if (pinCode !== '') {
             handleSubmit(pinCode);
-            // alert('Pin code = ' + pinCode);
+            // alert('Pin code = ' + formData.pin);
         }
     }, [pinCode]);
 
-    const navigate = (page) => {
-        router.push(page)
-    }
 
     return (
         <>
@@ -108,7 +186,7 @@ export default function OTP() {
                             </header>
                             <OTP_six_digit onPinEntered={handlePinCodeChange} />
                             <div class="text-sm text-slate-500 mt-4">Did not receive code?
-                                <a class="font-medium text-indigo-500 hover:text-indigo-600" href="#" onClick={(e) => {e.preventDefault(); navigate(routes.forget_password)}}>
+                                <a class="font-medium text-indigo-500 hover:text-indigo-600" href="#" onClick={(e) => {e.preventDefault(); Core_Functions.navigate(router, routes.forget_password)}}>
                                     Resend
                                 </a>
                             </div>

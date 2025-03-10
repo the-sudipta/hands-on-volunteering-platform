@@ -78,7 +78,12 @@ export default function OTP_six_digit({ onPinEntered }) {
                     ))}
                 </div>
 
-                <button className="" type="button" onClick={handleSubmit}>
+                <button
+                    className=""
+                    type="button"
+                    onClick={handleSubmit}
+                    style={{ cursor: 'pointer' }}
+                >
                     Submit
                 </button>
             </form>

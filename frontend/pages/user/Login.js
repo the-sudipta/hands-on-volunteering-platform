@@ -13,10 +13,10 @@ import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/post
 
 export default function Login() {
     const router = useRouter();
-    const { errors, validateAndSubmit } = Core_Functions.useFormValidation();
+    const {  validateAndSubmit } = Core_Functions.useFormValidation();
 
-    const [audio, setAudio] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    //region Core Variables
+
     const [isLoading, setIsLoading] = useState(false);
 
     const [SuccessMessage, setSuccessMessage] = useState('');
@@ -25,27 +25,30 @@ export default function Login() {
     const [Show_Success_Alert, setShow_Success_Alert] = useState(false);
     const [Show_Error_Alert, setShow_Error_Alert] = useState(false);
 
-    const [Email_Error, setEmail_Error] = useState('');
-    const [Password_Error, setPassword_Error] = useState('');
-
-
-    const { login, user } = useAuth();
-
-    // const [loginData, setLoginData] = useState({
-    //     email: '',
-    //     password: ''
-    // });
-
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
+
+    const [errors, setErrors] = useState({
+        email_error: '',
+        password_error: '',
+    });
+
+    //endregion Core Variables
+
+    const { login, user } = useAuth();
+
+
 
     // Defining Some Extra colors
     const form_color = 'rgb(31, 41, 55)';
     const input_field_color = 'rgb(55, 65, 81)';
     const forms_others_text_color = 'rgb(181, 186, 194)';
     const input_field_placeholder_color = 'rgb(156, 154, 142)';
+
+
+    //region Core Functions Per Page
 
     // Function to handle changes in email and password inputs
     const handleChange = (e) => {
@@ -55,6 +58,14 @@ export default function Login() {
             [name]: value,
         }));
     };
+
+    const handleErrors = (field, message) => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [field]: message,
+        }));
+    };
+
 
     const show_Error = (message) => {
         setShow_Error_Alert(true);
@@ -76,11 +87,12 @@ export default function Login() {
         }, 3000); // Hide after 3 seconds
     };
 
+    //endregion Core Functions Per Page
+
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.warn("Handle Submit CLICKED");
 
         const { isValid, validationErrors } = validateAndSubmit(formData);
 
@@ -93,11 +105,11 @@ export default function Login() {
                     console.log(response.data);
                     setIsLoading(false);
                     show_Success("Login Successful");
-                    navigate(routes.customer_dashboard);
+                    Core_Functions.navigate(router,routes.user_dashboard);
                 } else {
                     setIsLoading(false);
                     show_Error("Login failed");
-                    navigate(routes.login);
+                    Core_Functions.navigate(router,routes.login);
                 }
                 console.log("JWT = " + response.data.access_token);
             } catch (error) {
@@ -108,37 +120,27 @@ export default function Login() {
                 }
                 show_Error(errorMessage);
                 console.warn("Error Sending Login Request", error);
-                navigate(routes.login);
+                Core_Functions.navigate(router, routes.login);
             }
         } else {
             // Immediately use `validationErrors` instead of relying on state updates
             const errorEntries = Object.entries(validationErrors);
 
             if (errorEntries.length > 0) {
-                // Show the **first** error first
-                show_Error(errorEntries[0][1]);
+                // Set the **first** error first
+                handleErrors(errorEntries[0][0] + "_error", errorEntries[0][1]);
 
-                // Then, show the remaining errors one by one (optional)
-                errorEntries.slice(1).forEach(([key, message]) => {
-                    setTimeout(() => show_Error(message), 3000); // Delay for better readability
+                // Then, set the remaining errors one by one (optional)
+                errorEntries.slice(1).forEach(([key, message], index) => {
+                    setTimeout(() => handleErrors(key + "_error", message), index * 500);
                 });
             }
+
             console.log("Form validation failed:", validationErrors);
         }
     };
 
 
-
-
-
-    const navigate = (page) => {
-        router.push(page)
-    }
-
-
-    useEffect(() => {
-
-    }, []);
 
     return (
         <>
@@ -171,8 +173,8 @@ export default function Login() {
                                     />
                                     <label className="label">
                                         {/* <span className="label-text-alt">Bottom Left label</span> */}
-                                        <span className="label-text-alt text-red-600">
-                                            {Email_Error}
+                                        <span className="label-text-alt text-[#ff1f40]">
+                                            {errors.email_error}
                                         </span>
                                     </label>
                                 </div>
@@ -192,8 +194,8 @@ export default function Login() {
                                     />
                                     <label className="label">
                                          {/*<span className="label-text-alt text-gray-900">Bottom Left label</span>*/}
-                                        <span className="label-text-alt text-red-600">
-                                            {Password_Error}
+                                        <span className="label-text-alt text-[#ff1f40]">
+                                            {errors.password_error}
                                         </span>
                                     </label>
                                 </div>
@@ -201,11 +203,32 @@ export default function Login() {
                                     <div className="flex items-start">
 
                                     </div>
-                                    <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500" onClick={(e) => {e.preventDefault(); navigate(routes.forget_password)}}>Forgot password?</a>
+                                    <a
+                                        href="#"
+                                        className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
+                                        onClick={(e) => {e.preventDefault(); Core_Functions.navigate(router, routes.forget_password)}}
+                                        onMouseEnter={e => e.target.style.color = '#ff1f40'}
+                                        onMouseLeave={e => e.target.style.color = ''}
+                                    >
+                                        Forgot password?
+                                    </a>
                                 </div>
-                                <button type="submit" className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Sign in</button>
+                                <button
+                                    type="submit"
+                                    className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                    style={{ border: '1px solid white', cursor: 'pointer' }}
+                                >
+                                    Sign in
+                                </button>
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    Don’t have an account yet? <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500" onClick={(e) => {e.preventDefault(); navigate(routes.type)}}>Sign up</a>
+                                    Don’t have an account yet?
+                                    <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500 ml-2"
+                                       onClick={(e) => {e.preventDefault(); Core_Functions.navigate(router, routes.type)}}
+                                       onMouseEnter={e => e.target.style.color = '#4de876'}
+                                       onMouseLeave={e => e.target.style.color = ''}
+                                    >
+                                        Sign up
+                                    </a>
                                 </p>
                             </form>
                         </div>
