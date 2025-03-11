@@ -102,6 +102,7 @@ export default function Login() {
                 const response = await Core_Functions.submitForm(API_ENDPOINTS.userAuthLogin, formData);
                 if (response.data) {
                     login(await response.data.access_token, document.cookie);
+                    await localStorage.setItem("user", JSON.stringify({ jwt: await response.data.access_token}));
                     console.log(response.data);
                     setIsLoading(false);
                     show_Success("Login Successful");

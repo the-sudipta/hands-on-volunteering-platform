@@ -58,20 +58,39 @@ export const AuthProvider = ({ children }) => {
 
   async function doSignOut() {
     try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_ENDPOINT + API_ENDPOINTS.userAuthLogout, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        withCredentials: true,
-      });
-      console.log(response);
+      // ✅ Check if the user is already logged out to prevent 401 errors
+      const storedUser = localStorage.getItem("authUser");
+      if (!storedUser || storedUser === "null") {
+        console.warn("User already logged out, skipping API request.");
+      } else {
+        // ✅ Only call the API if the user is still authenticated
+        const response = await axios.get(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + API_ENDPOINTS.userProfile,
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              withCredentials: true,
+            }
+        );
+        console.log(response);
+      }
+
+      // ✅ Clear session data safely
       localStorage.removeItem("authUser");
       setUser(null);
       document.cookie = null;
-      delete axios.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common["Authorization"];
       await router.push(routes.login);
     } catch (error) {
-      console.error("Logout error: ", error);
+      if (error.response && error.response.status === 401) {
+        console.warn("401 Unauthorized: User is already logged out.");
+      } else {
+        console.error("Logout error: ", error);
+      }
     }
   }
+
 
   return (
       <AuthContext.Provider value={{ user, login, logout, checkUser }}>

@@ -12,7 +12,6 @@ const API_ENDPOINTS = {
     userProfileUpdate: "/api/user/profile/update",
     userForgetPassword: "/api/user/forget_password",
     userOTP: "/api/user/otp",
-    navbarInfo: "/api/user/navbar_info",
 };
 
 export default API_ENDPOINTS;

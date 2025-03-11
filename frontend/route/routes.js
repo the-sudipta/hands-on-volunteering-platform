@@ -8,6 +8,8 @@ const routes = {
     otp_verification: '/user/OTP',
     new_password: '/user/New_Password',
     create_user_profile: '/user/Create_Profile',
+    show_my_profile: '/user/Profile',
+    dashboard: '/user/Dashboard',
 };
 
 export default routes;

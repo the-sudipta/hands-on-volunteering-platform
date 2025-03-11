@@ -247,11 +247,13 @@ export class UserService {
     const profile_details = await this.profileRepository.findOneBy({
       user: user
     });
+    console.log('Returning User Profile Data from Service = ' + profile_details);
     if (!profile_details) {
       throw new InternalServerErrorException(
         'Can not fetch profile details for the current user',
       );
     }
+
     return (await this.mapperService.entityToDto(
       profile_details,
       User_ProfileDTO,

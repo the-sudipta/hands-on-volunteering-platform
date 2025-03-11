@@ -14,11 +14,11 @@ import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/post
 export default function Signup() {
     const router = useRouter();
     const {  validateAndSubmit } = Core_Functions.useFormValidation();
+    const [currentStep, setCurrentStep] = useState(1);
 
     //region Core Variables
 
     const [isLoading, setIsLoading] = useState(false);
-    const [currentStep, setCurrentStep] = useState(1);
 
     const [SuccessMessage, setSuccessMessage] = useState('');
     const [ErrorMessage, setErrorMessage] = useState('');

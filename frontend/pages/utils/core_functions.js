@@ -2,10 +2,15 @@ import {useEffect, useState} from 'react';
 import axios from 'axios';
 import qs from "qs"; // Importing qs for URL encoding
 
+
+
+
+
+//region Core Functions
+
 export const navigate = (router, page) => {
     router.push(page); // Navigate to the page using Next.js router
 };
-
 
 // Function to execute callback immediately or on dependency change
 export const useEffectWithoutTimeout = (callback, dependencies = []) => {
@@ -79,7 +84,6 @@ export const validateFields = (fields) => {
     return errors;  // Returns an object with key: error message pairs
 };
 
-
 // Custom hook to manage form validation and submission
 export const useFormValidation = () => {
     const [errors, setErrors] = useState({});
@@ -110,13 +114,15 @@ export const submitForm = async (endpoint, formData) => {
         {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Authorization": `Bearer ${token}`,  // Add the JWT token here
+                // "Authorization": `Bearer ${token}`,  // Add the JWT token here
             },
             withCredentials: true,
         }
     );
     return response; // Returning the response data to be used in the calling component
 };
+
+
 
 // Function to set a cookie with a 1-hour expiration time
 export const setCookie = (key, value) => {
@@ -141,7 +147,29 @@ export const getCookie = (key) => {
     return ""; // Return empty string if cookie is not found
 };
 
+export const fetchData = async (endpoint) => {
+    console.log('Public ENDPOINT = ', process.env.NEXT_PUBLIC_API_ENDPOINT);
+    console.log('Specific ENDPOINT = ', endpoint);
+    // const token = '';
+    // if(document.cookie && document.cookie.includes('access_token=')) {
+    //     const token = document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1];
+    // }
+    // console.log('Token Before Sending the request = ',token);
 
+    const response = await axios.get(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
+        {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                // "Authorization": `Bearer ${token}`,  // Commented, because already added in AuthContext.js file
+            },
+            withCredentials: true,
+        }
+    );
+    return response; // Returning the response data to be used in the calling component
+};
+
+//endregion Core Functions
 
 // Export functions as an object
 export const Core_Functions = {
@@ -152,5 +180,6 @@ export const Core_Functions = {
     useFormValidation,
     submitForm,
     setCookie,
-    getCookie
+    getCookie,
+    fetchData
 };
