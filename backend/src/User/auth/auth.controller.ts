@@ -45,7 +45,10 @@ export class AuthController {
           message: 'Email Already Exists',
         });
       } else {
-        return user_id;
+        return {
+          "success": true,
+          "user_id": user_id,
+        };
       }
     } catch (e) {
       throw new BadRequestException({

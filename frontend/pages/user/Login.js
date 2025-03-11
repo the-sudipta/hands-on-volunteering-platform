@@ -223,7 +223,7 @@ export default function Login() {
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                     Don’t have an account yet?
                                     <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500 ml-2"
-                                       onClick={(e) => {e.preventDefault(); Core_Functions.navigate(router, routes.type)}}
+                                       onClick={(e) => {e.preventDefault(); Core_Functions.navigate(router, routes.signup)}}
                                        onMouseEnter={e => e.target.style.color = '#4de876'}
                                        onMouseLeave={e => e.target.style.color = ''}
                                     >

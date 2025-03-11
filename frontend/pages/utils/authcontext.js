@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
   async function doSignOut() {
     try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_ENDPOINT + API_ENDPOINTS.customerAuthLogout, {
+      const response = await axios.post(process.env.NEXT_PUBLIC_API_ENDPOINT + API_ENDPOINTS.userAuthLogout, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         withCredentials: true,
       });

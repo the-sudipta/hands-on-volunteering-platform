@@ -7,7 +7,7 @@ const routes = {
     forget_password: '/user/Forget_Password',
     otp_verification: '/user/OTP',
     new_password: '/user/New_Password',
-    create_user_profile: '/user/Info'
+    create_user_profile: '/user/Create_Profile',
 };
 
 export default routes;

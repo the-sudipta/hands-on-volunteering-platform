@@ -6,8 +6,9 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Column } from 'typeorm';
 
-// Signup Purpose
+// Signup Purpose My Profile
 export class UserDto {
   @IsNotEmpty({ message: 'Id cannot be empty or null' })
   id: number;
@@ -23,6 +24,18 @@ export class UserDto {
   // Nid
   @IsNotEmpty({ message: 'NID cannot be empty or null' })
   nid: string;
+
+  // Gender
+  @IsNotEmpty({ message: 'Gender cannot be empty or null' })
+  gender: string;
+
+  // Age
+  @IsNotEmpty({ message: 'Age cannot be empty or null' })
+  age: string;
+
+  // Address
+  @IsNotEmpty({ message: 'Address cannot be empty or null' })
+  address: string;
 
   // Phone
   @IsNotEmpty({ message: 'Phone number cannot be empty or null' })

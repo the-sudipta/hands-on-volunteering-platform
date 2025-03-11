@@ -8,6 +8,7 @@ const API_ENDPOINTS = {
     userService: "/api/user/user_service",
     userSignupDetails: "/api/user/signup/user_details",
     userProfile: "/api/user/profile",
+    userProfileCreate: "/api/user/signup/user_details",
     userProfileUpdate: "/api/user/profile/update",
     userForgetPassword: "/api/user/forget_password",
     userOTP: "/api/user/otp",

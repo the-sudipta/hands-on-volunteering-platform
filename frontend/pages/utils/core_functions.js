@@ -44,13 +44,18 @@ const validationRules = {
     password: (value) => /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[0-9a-zA-Z!@#$%^&*()_+]{8,}$/.test(value), // Password format validation
     required: (value) => value && String(value).trim() !== '', // Convert value to string before trimming
     age: (value) => /^\d{1,3}$/.test(value) && value >= 18 && value <= 120, // Age must be a number between 18 and 120
-    phone: (value) => /^[0-9]{10}$/.test(value), // Phone number validation (e.g., 10-digit phone number)
+    phone: (value) => /^(?:\+|0)?[0-9]{10,14}$/.test(value), // Phone number should be 11 to 15 digits, allowing "+" or "0" at the start
     money: (value) => /^[0-9]+(\.[0-9]{1,2})?$/.test(value), // Money format validation (e.g., 100, 100.50)
     zipCode: (value) => /^\d{5}$/.test(value), // ZIP code format (5 digits)
     date: (value) => /^\d{4}-\d{2}-\d{2}$/.test(value), // Date format (YYYY-MM-DD)
     url: (value) => /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/.test(value), // URL validation
     otp: (value) => value && /^[0-9]{4,6}$/.test(String(value).trim()), // Convert to string, trim and validate PIN (4 to 6 digits)
     confirm_password: (value, fields) => value === fields.password, // Confirm password should match the password
+    name: (value) => /^[a-zA-Z\s]{2,50}$/.test(value), // Name should be 2-50 characters, only letters and spaces
+    gender: (value) => ['male', 'female', 'other'].includes(value.toLowerCase()), // Gender should be valid
+    nid: (value) => /^[0-9]{10,17}$/.test(value), // NID should be 10-17 digits
+    address: (value) => value && value.length >= 5 && value.length <= 120, // Address should be between 5 and 120 characters
+    role: (value) => ['admin', 'volunteer'].includes(value.toLowerCase()), // Role should be one of the predefined values
 };
 
 // Generalized function to validate any field
@@ -95,7 +100,7 @@ export const submitForm = async (endpoint, formData) => {
     console.log('Specific ENDPOINT', endpoint);
     console.log('FormData = ', formData);
     const token = '';
-    if(document.cookie && document.cookie !== '') {
+    if(document.cookie && document.cookie.includes('access_token=')) {
         const token = document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1];
     }
 
@@ -113,6 +118,30 @@ export const submitForm = async (endpoint, formData) => {
     return response; // Returning the response data to be used in the calling component
 };
 
+// Function to set a cookie with a 1-hour expiration time
+export const setCookie = (key, value) => {
+    const expirationTime = new Date();
+    expirationTime.setTime(expirationTime.getTime() + 60 * 60 * 1000); // Set cookie expiration for 1 hour
+    document.cookie = `${key}=${value}; expires=${expirationTime.toUTCString()}; path=/`;
+};
+
+// Function to get a cookie by its key
+export const getCookie = (key) => {
+    const name = key + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+
+    for (let i = 0; i < cookieArray.length; i++) {
+        let c = cookieArray[i];
+        while (c.charAt(0) === ' ') c = c.substring(1); // Trim leading space
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length); // Return the cookie value
+        }
+    }
+    return ""; // Return empty string if cookie is not found
+};
+
+
 
 // Export functions as an object
 export const Core_Functions = {
@@ -122,4 +151,6 @@ export const Core_Functions = {
     useEffectWithTimeout,
     useFormValidation,
     submitForm,
+    setCookie,
+    getCookie
 };

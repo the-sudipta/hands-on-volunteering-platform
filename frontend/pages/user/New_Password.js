@@ -82,7 +82,7 @@ export default function New_Password() {
 
     //endregion Core Functions Per Page
 
-    
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

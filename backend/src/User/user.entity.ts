@@ -40,6 +40,15 @@ export class ProfileEntity {
   @Column()
   nid: string;
 
+  @Column()
+  gender: string;
+
+  @Column()
+  age: string;
+
+  @Column()
+  address: string;
+
   // @Column({ unique: true })
   @Column()
   phone: string;
