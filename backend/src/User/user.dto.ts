@@ -89,6 +89,15 @@ export class User_ProfileDTO {
   // Phone
   @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
   phone: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  gender: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  age: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  address: string;
 }
 
 export class ForgetPasswordDTO {

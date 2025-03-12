@@ -133,7 +133,7 @@ export class UserController {
   }
 
 
-  @Put('/profile/update')
+  @Post('/profile/update')
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
   @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)

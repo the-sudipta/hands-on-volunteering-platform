@@ -193,10 +193,10 @@ const Navigation = ({ children }) => {
             } else {
                 Core_Functions.navigate(router, routes.dashboard);
             }
-            setIsLoading(false);
         } catch (error) {
             console.error('Error in Logging Out:', error);
         }
+        setIsLoading(false);
     }
 
 

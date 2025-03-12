@@ -224,9 +224,13 @@ export class UserService {
       })) as UserEntity;
 
       previous_data.name = updated_data.name;
-      previous_data.email = updated_data.email;
+      // previous_data.email = updated_data.email;
       previous_data.nid = updated_data.nid;
       previous_data.phone = updated_data.phone;
+      previous_data.gender = updated_data.gender;
+      previous_data.age = updated_data.age;
+      previous_data.address = updated_data.address;
+
 
       const decision = await this.profileRepository.save(previous_data);
 
@@ -254,10 +258,12 @@ export class UserService {
       );
     }
 
-    return (await this.mapperService.entityToDto(
+    const profile_DTO = (await this.mapperService.entityToDto(
       profile_details,
       User_ProfileDTO,
     ));
+    profile_DTO.email = email;
+    return profile_DTO;
   }
 
   //region JWT Functionalities
