@@ -6,8 +6,9 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Column } from 'typeorm';
 
-// Signup Purpose
+// Signup Purpose My Profile
 export class UserDto {
   @IsNotEmpty({ message: 'Id cannot be empty or null' })
   id: number;
@@ -23,6 +24,18 @@ export class UserDto {
   // Nid
   @IsNotEmpty({ message: 'NID cannot be empty or null' })
   nid: string;
+
+  // Gender
+  @IsNotEmpty({ message: 'Gender cannot be empty or null' })
+  gender: string;
+
+  // Age
+  @IsNotEmpty({ message: 'Age cannot be empty or null' })
+  age: string;
+
+  // Address
+  @IsNotEmpty({ message: 'Address cannot be empty or null' })
+  address: string;
 
   // Phone
   @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
@@ -65,9 +78,9 @@ export class User_ProfileDTO {
   name: string;
 
   // Email
-  @IsNotEmpty({ message: 'Email cannot be empty or null' })
-  @IsEmail({}, { message: 'Please enter a valid email address' })
-  email: string;
+  // @IsNotEmpty({ message: 'Email cannot be empty or null' })
+  // @IsEmail({}, { message: 'Please enter a valid email address' })
+  // email: string;
 
   // Nid
   @IsNotEmpty({ message: 'Gender cannot be empty or null' })
@@ -76,6 +89,15 @@ export class User_ProfileDTO {
   // Phone
   @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
   phone: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  gender: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  age: string;
+
+  @IsNotEmpty({ message: 'Phone number cannot be empty or null' })
+  address: string;
 }
 
 export class ForgetPasswordDTO {

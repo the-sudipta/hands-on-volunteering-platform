@@ -40,6 +40,15 @@ export class ProfileEntity {
   @Column()
   nid: string;
 
+  @Column()
+  gender: string;
+
+  @Column()
+  age: string;
+
+  @Column()
+  address: string;
+
   // @Column({ unique: true })
   @Column()
   phone: string;
@@ -60,8 +69,10 @@ export class SessionEntity {
   @Column()
   jwt_token: string;
 
-  @Column()
-  expiration_date: string;
+  @Column({ nullable: true, type: 'varchar', length: 255 })
+  expiration_date: string | null;
+
+
 
   @ManyToOne(() => UserEntity, (user) => user.sessions)
   @JoinColumn({ name: 'user_id' })
