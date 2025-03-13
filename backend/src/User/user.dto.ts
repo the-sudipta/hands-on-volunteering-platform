@@ -78,9 +78,9 @@ export class User_ProfileDTO {
   name: string;
 
   // Email
-  @IsNotEmpty({ message: 'Email cannot be empty or null' })
-  @IsEmail({}, { message: 'Please enter a valid email address' })
-  email: string;
+  // @IsNotEmpty({ message: 'Email cannot be empty or null' })
+  // @IsEmail({}, { message: 'Please enter a valid email address' })
+  // email: string;
 
   // Nid
   @IsNotEmpty({ message: 'Gender cannot be empty or null' })

@@ -24,6 +24,7 @@ export default function Profile() {
     const [formData, setFormData] = useState({
         id: -1,
         name: "",
+        email: "x@x.com",
         nid: "",
         phone: "",
         gender: "",
@@ -121,7 +122,7 @@ export default function Profile() {
             console.log("Final Payload before request:", payload);
 
 
-            const response = await Core_Functions.submitForm(API_ENDPOINTS.userProfileCreate, payload, true);
+            const response = await Core_Functions.submitForm(API_ENDPOINTS.userProfileUpdate, payload, true);
 
             if (response.data) {
                 show_Success("Profile updated successfully");
