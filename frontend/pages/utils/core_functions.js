@@ -163,27 +163,40 @@ export const getCookie = (key) => {
     return ""; // Return empty string if cookie is not found
 };
 
-export const fetchData = async (endpoint) => {
-    console.log('Public ENDPOINT = ', process.env.NEXT_PUBLIC_API_ENDPOINT);
-    console.log('Specific ENDPOINT = ', endpoint);
-    // const token = '';
-    // if(document.cookie && document.cookie.includes('access_token=')) {
-    //     const token = document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1];
-    // }
-    // console.log('Token Before Sending the request = ',token);
+export const fetchData = async (endpoint, useJson = true) => {
+    console.log("Public ENDPOINT:", process.env.NEXT_PUBLIC_API_ENDPOINT);
+    console.log("Specific ENDPOINT:", endpoint);
 
-    const response = await axios.get(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
-        {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                // "Authorization": `Bearer ${token}`,  // Commented, because already added in AuthContext.js file
-            },
-            withCredentials: true,
-        }
-    );
-    return response; // Returning the response data to be used in the calling component
+    // ✅ Correctly retrieve token from cookies
+    let token = "";
+    if (document.cookie.includes("access_token=")) {
+        token = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("access_token="))
+            .split("=")[1];
+    }
+
+    console.log("Token Before Sending the request:", token);
+
+    try {
+        const response = await axios.get(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
+            {
+                headers: {
+                    "Content-Type": useJson ? "application/json" : "application/x-www-form-urlencoded",
+                    "Authorization": `Bearer ${token}`,
+                },
+                withCredentials: true,
+            }
+        );
+        console.log("Axios Response:", response.data);
+        return response;
+    } catch (error) {
+        console.error("Axios Error:", error.response?.data || error.message);
+        throw error;
+    }
 };
+
 
 //endregion Core Functions
 
