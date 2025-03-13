@@ -230,6 +230,7 @@ export class UserService {
       previous_data.gender = updated_data.gender;
       previous_data.age = updated_data.age;
       previous_data.address = updated_data.address;
+      previous_data.user = previous_user;
 
 
       const decision = await this.profileRepository.save(previous_data);
@@ -247,11 +248,11 @@ export class UserService {
 
   async Show_My_Profile_Details(email: string): Promise<User_ProfileDTO> {
     const user = await this.get_user_from_email(email);
-    console.log('Got the user = ' + user.email);
+    // console.log('Got the user = ' + user.email);
     const profile_details = await this.profileRepository.findOneBy({
       user: user
     });
-    console.log('Returning User Profile Data from Service = ' + profile_details);
+    // console.log('Returning User Profile Data from Service = ' + profile_details);
     if (!profile_details) {
       throw new InternalServerErrorException(
         'Can not fetch profile details for the current user',
@@ -262,7 +263,7 @@ export class UserService {
       profile_details,
       User_ProfileDTO,
     ));
-    profile_DTO.email = email;
+    // profile_DTO.email = email;
     return profile_DTO;
   }
 

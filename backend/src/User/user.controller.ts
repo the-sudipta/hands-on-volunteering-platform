@@ -141,6 +141,8 @@ export class UserController {
     @Request() req,
     @Body() updated_data: User_ProfileDTO,
   ): Promise<any> {
+    console.log("Received Payload in NestJS:", req.body);
+    console.log("Received Headers in NestJS:", req.headers);
     try {
       const update_decision = await this.userService.Update_Own_Profile_Details(
         req.user.email,
@@ -148,12 +150,15 @@ export class UserController {
       );
       return {
         success: true,
-        message: 'Password updated successfully',
+        message: 'Profile updated successfully',
       };
     } catch (e) {
+      console.error("Error in Update_own_Profile:", e.message);
       throw new InternalServerErrorException(e.message);
     }
   }
+
+
 
   @Get('/profile')
   @UseGuards(AuthGuard)

@@ -134,7 +134,7 @@ export default function OTP() {
 
         if (isValid) {
             setIsLoading(true);
-            const response = await Core_Functions.submitForm(API_ENDPOINTS.userOTP, formData);
+            const response = await Core_Functions.submitForm(API_ENDPOINTS.userOTP, formData, true);
             if (response.data) {
                 console.log(response.data);
                 setIsLoading(false);

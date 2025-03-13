@@ -24,7 +24,6 @@ export default function Profile() {
     const [formData, setFormData] = useState({
         id: -1,
         name: "",
-        email: "",
         nid: "",
         phone: "",
         gender: "",
@@ -113,9 +112,16 @@ export default function Profile() {
             console.error('Update Clicked and data = ', formData);
 
             // Ensure id is included in the payload
-            const payload = { ...formData, id: formData.id || user?.id,  };
+            const payload = { ...formData };
+            if (!payload.id || payload.id === -1) {
+                payload.id = user?.id;
+            }
+            payload.id = String(payload.id); // Ensure id is a string
 
-            const response = await Core_Functions.submitForm(API_ENDPOINTS.userProfileCreate, payload);
+            console.log("Final Payload before request:", payload);
+
+
+            const response = await Core_Functions.submitForm(API_ENDPOINTS.userProfileCreate, payload, true);
 
             if (response.data) {
                 show_Success("Profile updated successfully");

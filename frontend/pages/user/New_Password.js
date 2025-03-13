@@ -94,7 +94,7 @@ export default function New_Password() {
                 // alert('Change Password', formData.password);
                 // alert('Confirm Password', formData.confirm_password);
                 setIsLoading(true);
-                const response = await Core_Functions.submitForm(API_ENDPOINTS.userAuthChangePassword, formData);
+                const response = await Core_Functions.submitForm(API_ENDPOINTS.userAuthChangePassword, formData,true);
                 if (response.data) {
                     console.log(response.data);
                     setIsLoading(false);

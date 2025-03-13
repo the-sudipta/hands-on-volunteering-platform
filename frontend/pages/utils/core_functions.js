@@ -99,28 +99,44 @@ export const useFormValidation = () => {
 };
 
 // Generalized function to handle form submission
-export const submitForm = async (endpoint, formData) => {
-    console.log('Public ENDPOINT', process.env.NEXT_PUBLIC_API_ENDPOINT);
-    console.log('Specific ENDPOINT', endpoint);
-    console.log('FormData = ', formData);
-    const token = '';
-    if(document.cookie && document.cookie.includes('access_token=')) {
-        const token = document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1];
+
+export const submitForm = async (endpoint, formData, useJson = false) => {
+    console.log("Public ENDPOINT:", process.env.NEXT_PUBLIC_API_ENDPOINT);
+    console.log("Specific ENDPOINT:", endpoint);
+    console.log("Raw FormData:", formData);
+
+    let token = "";
+    if (document.cookie.includes("access_token=")) {
+        token = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("access_token="))
+            .split("=")[1];
     }
 
-    const response = await axios.post(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
-        qs.stringify(formData),
-        {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                // "Authorization": `Bearer ${token}`,  // Add the JWT token here
-            },
-            withCredentials: true,
-        }
-    );
-    return response; // Returning the response data to be used in the calling component
+    // Dynamically choose data format
+    const transformedData = useJson ? formData : qs.stringify(formData);
+    console.log("Transformed FormData:", transformedData);
+
+    try {
+        const response = await axios.post(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
+            transformedData,
+            {
+                headers: {
+                    "Content-Type": useJson ? "application/json" : "application/x-www-form-urlencoded",
+                    "Authorization": `Bearer ${token}`,
+                },
+                withCredentials: true,
+            }
+        );
+        console.log("Axios Response:", response.data);
+        return response;
+    } catch (error) {
+        console.error("Axios Error:", error.response?.data || error.message);
+        throw error;
+    }
 };
+
 
 
 

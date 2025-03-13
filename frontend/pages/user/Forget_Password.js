@@ -94,7 +94,7 @@ export default function Forget_Password() {
             if (isValid) {
                 try {
                     setIsLoading(true);
-                    const response = await Core_Functions.submitForm(API_ENDPOINTS.userForgetPassword, formData);
+                    const response = await Core_Functions.submitForm(API_ENDPOINTS.userForgetPassword, formData, true);
                     if (response.data) {
                         login(await response.data.access_token, document.cookie);
                         console.log(response.data.access_token);
