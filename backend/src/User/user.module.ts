@@ -1,7 +1,15 @@
 import { Module } from '@nestjs/common';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OtpEntity, ProfileEntity, SessionEntity, UserEntity } from './user.entity';
+import {
+  AttendeeEntity, CertificateEntity, CommentEntity,
+  Community_Help_RequestEntity,
+  EventEntity,
+  OtpEntity,
+  ProfileEntity,
+  SessionEntity, TeamEntity,
+  UserEntity,
+} from './user.entity';
 import { MapperService } from './mapper.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TokenBlacklistService } from './auth/token_blacklist.service';
@@ -11,7 +19,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity, ProfileEntity]),
+    TypeOrmModule.forFeature([UserEntity, SessionEntity, OtpEntity, ProfileEntity, EventEntity,
+      Community_Help_RequestEntity, AttendeeEntity, CommentEntity, TeamEntity, CertificateEntity]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_CUSTOM_SECRET,
