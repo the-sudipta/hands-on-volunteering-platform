@@ -272,6 +272,8 @@ export class UserService {
   }
 
 
+  // Feature 3 : Community Help Request
+
   async Create_HelpRequest(email: string, helpReq: CommunityHelpRequestDto): Promise<any> {
     try {
       // Find the user by email
@@ -320,6 +322,33 @@ export class UserService {
       );
     }
   }
+
+  async Get_All_HelpRequest(): Promise<CommunityHelpRequestDto[] | null> {
+    try {
+      // Fetch all help request entities
+      const allHelpRequestsEntities = await this.helpReqRepository.find();
+
+      // Convert the list of entities to DTOs using mapperService
+      const all_help_requests = this.mapperService.listEntitiesToListDtos(
+        allHelpRequestsEntities,
+        CommunityHelpRequestDto
+      );
+
+      // Check if the list is empty
+      if (all_help_requests.length > 0) {
+        return all_help_requests;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `User Service, Get All Help Requests Error = ${e.message}`
+      );
+    }
+  }
+
+
+
 
 
 

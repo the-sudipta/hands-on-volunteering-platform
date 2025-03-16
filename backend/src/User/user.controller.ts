@@ -233,6 +233,37 @@ export class UserController {
     }
   }
 
+  @Get('/help_request/') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Get_All_Help_Requests(@Request() req): Promise<any> {
+    console.log('Request Headers:', req.headers);
+    // console.log('Requested ID:', id); // Log the extracted ID
+
+    try {
+
+      const all_help_req = await this.userService.Get_All_HelpRequest();
+
+      if (all_help_req !== null) {
+        return all_help_req;
+      }else{
+        throw new NotFoundException(`No help request found`);
+      }
+
+
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Get All Help Request Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
+    }
+  }
+
+
+
 
 
 
