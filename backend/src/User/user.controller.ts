@@ -19,6 +19,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
+  CommentReceiverDto,
   CommunityHelpRequestDto,
   ForgetPasswordDTO,
   OTP_ReceiverDTO,
@@ -261,6 +262,67 @@ export class UserController {
       throw e; // Re-throw NotFoundException
     }
   }
+
+  @Get('/help_request/comments') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Get_All_Comments_For_Single_Help_Request(@Request() req, id:number): Promise<any> {
+    console.log('Request Headers:', req.headers);
+    // console.log('Requested ID:', id); // Log the extracted ID
+
+    try {
+
+
+      const all_Comments = await this.userService.Get_All_Comments_By_Blog_Number(id);
+      if (all_Comments !== null) {
+        return all_Comments;
+      }else {
+        throw new NotFoundException(`No Comments Found`);
+      }
+
+
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Get All Comments for single Blog Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
+    }
+  }
+
+  @Post('/help_request/comment/post') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Post_A_Comment_For_Single_Help_Request(@Request() req, @Body() receivedComment: CommentReceiverDto): Promise<any> {
+    // console.log('Request Headers:', req.headers);
+    // console.log('Requested ID:', id); // Log the extracted ID
+
+    try {
+
+      // console.log('Request ID : ', receivedComment.community_help_request_id);
+
+      const new_comment = await this.userService.Post_a_Comment_For_a_Blog(req.user.email, receivedComment);
+      if (new_comment !== null) {
+        return new_comment;
+      }else {
+        throw new InternalServerErrorException(`No Comments Found`);
+      }
+
+
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Post a Comment for single Hep Request Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
+    }
+  }
+
+
 
 
 

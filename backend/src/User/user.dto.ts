@@ -201,6 +201,16 @@ export class CommentDto {
   community_help_request_id: number;
 }
 
+export class CommentReceiverDto {
+
+  @IsNotEmpty({ message: 'Text cannot be empty or null' })
+  text: string;
+
+  @IsNotEmpty({ message: 'Community help request id cannot be empty or null' })
+  community_help_request_id: number;
+}
+
+
 export class TeamDto {
   @IsNotEmpty({ message: 'Id cannot be empty or null' })
   id: number;

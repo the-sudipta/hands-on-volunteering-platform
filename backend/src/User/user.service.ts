@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  CommentEntity,
   Community_Help_RequestEntity,
   OtpEntity,
   ProfileEntity,
@@ -12,7 +14,14 @@ import {
   UserEntity,
 } from './user.entity';
 import { Repository } from 'typeorm';
-import { CommunityHelpRequestDto, LoginDTO, User_ProfileDTO, UserDto } from './user.dto';
+import {
+  CommentDto,
+  CommentReceiverDto,
+  CommunityHelpRequestDto,
+  LoginDTO,
+  User_ProfileDTO,
+  UserDto,
+} from './user.dto';
 import { MapperService } from './mapper.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -39,6 +48,9 @@ export class UserService {
 
     @InjectRepository(Community_Help_RequestEntity)
     private helpReqRepository: Repository<Community_Help_RequestEntity>,
+
+    @InjectRepository(CommentEntity)
+    private commentRepository: Repository<CommentEntity>,
 
     private mailerService: MailerService,
     private mapperService: MapperService,
@@ -346,6 +358,87 @@ export class UserService {
       );
     }
   }
+
+  async Get_All_Comments_By_Blog_Number(req_id: number): Promise<CommentDto[] | null> {
+    try {
+      // Fetch the help request entity by ID
+      const help_req = await this.helpReqRepository.findOneBy({ id: req_id });
+
+      // If no help request is found, return null
+      if (!help_req) {
+        return null;
+      }
+
+      // Fetch all comments linked to this help request
+      const all_commentsEntities = await this.commentRepository.findBy({
+        community_help_request: help_req,
+      });
+
+      // Convert the list of entities to DTOs using mapperService
+      const all_comments = this.mapperService.listEntitiesToListDtos(
+        all_commentsEntities,
+        CommentDto
+      );
+
+      // Return DTO array or null if empty
+      return all_comments.length > 0 ? all_comments : null;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `User Service, Get All Comments Error = ${e.message}`
+      );
+    }
+  }
+
+  async Post_a_Comment_For_a_Blog(email: string, commentReceiverDtoDTO: CommentReceiverDto): Promise<CommentDto | null> {
+    try {
+      // Debugging: Log the received DTO
+      // console.log("Received DTO:", commentReceiverDtoDTO);
+
+      // Step 1: Validate input
+      if (!commentReceiverDtoDTO || !commentReceiverDtoDTO.community_help_request_id) {
+        throw new BadRequestException("Invalid comment data: Missing community_help_request_id");
+      }
+
+      // Step 2: Find the user by email
+      const userEntity = await this.userRepository.findOneBy({ email: email });
+      if (!userEntity) {
+        throw new NotFoundException(`User with email ${email} not found`);
+      }
+
+      // Step 3: Find the Community Help Request by ID
+      const helpReqEntity = await this.helpReqRepository.findOneBy({ id: commentReceiverDtoDTO.community_help_request_id });
+      if (!helpReqEntity) {
+        throw new NotFoundException(`Help Request with ID ${commentReceiverDtoDTO.community_help_request_id} not found`);
+      }
+
+      // Step 4: Create and populate the new comment entity
+      const comment = new CommentEntity();
+      comment.text = commentReceiverDtoDTO.text;
+      comment.time = new Date().toISOString(); // Set the current time as ISO string
+      comment.user = userEntity;
+      comment.community_help_request = helpReqEntity;
+
+      // Step 5: Save the comment entity
+      const savedCommentEntity = await this.commentRepository.save(comment);
+
+      // Step 6: Convert to DTO and return
+      return savedCommentEntity
+        ? await this.mapperService.entityToDto(savedCommentEntity, CommentDto)
+        : null;
+
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'User Service, Post a comment for Single Help Request Error = ' + e.message,
+      );
+    }
+  }
+
+
+
+
+
+
+
 
 
 
