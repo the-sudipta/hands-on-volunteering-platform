@@ -5,13 +5,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Community_Help_RequestEntity,
   OtpEntity,
   ProfileEntity,
   SessionEntity,
   UserEntity,
 } from './user.entity';
 import { Repository } from 'typeorm';
-import { LoginDTO, User_ProfileDTO, UserDto } from './user.dto';
+import { CommunityHelpRequestDto, LoginDTO, User_ProfileDTO, UserDto } from './user.dto';
 import { MapperService } from './mapper.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -35,6 +36,9 @@ export class UserService {
     private sessionRepository: Repository<SessionEntity>,
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
+
+    @InjectRepository(Community_Help_RequestEntity)
+    private helpReqRepository: Repository<Community_Help_RequestEntity>,
 
     private mailerService: MailerService,
     private mapperService: MapperService,
@@ -266,6 +270,62 @@ export class UserService {
     // profile_DTO.email = email;
     return profile_DTO;
   }
+
+
+  async Create_HelpRequest(email: string, helpReq: CommunityHelpRequestDto): Promise<any> {
+    try {
+      // Find the user by email
+      const userEntity = await this.userRepository.findOneBy({ email: email });
+
+      // Check if userEntity is null before proceeding
+      if (!userEntity) {
+        throw new NotFoundException(`User with email ${email} not found`);
+      }
+
+      // Convert DTO to entity
+      const helpReqEntity = await this.mapperService.dtoToEntity(helpReq, Community_Help_RequestEntity);
+
+      // Assign the user entity
+      helpReqEntity.user = userEntity;
+
+      // Save the help request entity
+      const returnedHelpReqEntity = await this.helpReqRepository.save(helpReqEntity);
+
+      // Convert the saved entity back to DTO and return
+      const helpRequestDto = await this.mapperService.entityToDto(returnedHelpReqEntity, CommunityHelpRequestDto);
+      return helpRequestDto;
+
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'User Service, Create Help Request Error = ' + e.message,
+      );
+    }
+  }
+
+  async Get_Single_HelpRequest(id:number): Promise<CommunityHelpRequestDto | null> {
+    try {
+
+      const helpReqEntity = await this.helpReqRepository.findOneBy({id: id}) as Community_Help_RequestEntity;
+
+      const helpRequestDto = await this.mapperService.entityToDto(helpReqEntity, CommunityHelpRequestDto) as CommunityHelpRequestDto;
+      if (helpRequestDto !== null) {
+        return helpRequestDto;
+      }else {
+        return null;
+      }
+
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'User Service, Get Single Help Request Error = ' + e.message,
+      );
+    }
+  }
+
+
+
+
+
+
 
   //region JWT Functionalities
 

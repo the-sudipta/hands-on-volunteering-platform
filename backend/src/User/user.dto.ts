@@ -125,3 +125,108 @@ export class New_PasswordDTO {
   )
   password: string;
 }
+
+
+export class EventDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Title cannot be empty or null' })
+  title: string;
+
+  @IsNotEmpty({ message: 'Category cannot be empty or null' })
+  category: string;
+
+  @IsNotEmpty({ message: 'Location cannot be empty or null' })
+  location: string;
+
+  @IsNotEmpty({ message: 'Description cannot be empty or null' })
+  description: string;
+
+  @IsNotEmpty({ message: 'Time cannot be empty or null' })
+  time: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+}
+
+export class CommunityHelpRequestDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Title cannot be empty or null' })
+  title: string;
+
+  @IsNotEmpty({ message: 'Status cannot be empty or null' })
+  status: string;
+
+  @IsNotEmpty({ message: 'Description cannot be empty or null' })
+  description: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+}
+
+export class AttendeeDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Start time cannot be empty or null' })
+  start_time: string;
+
+  @IsNotEmpty({ message: 'End time cannot be empty or null' })
+  end_time: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+
+  @IsNotEmpty({ message: 'Event id cannot be empty or null' })
+  event_id: number;
+}
+
+export class CommentDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Text cannot be empty or null' })
+  text: string;
+
+  @IsNotEmpty({ message: 'Time cannot be empty or null' })
+  time: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+
+  @IsNotEmpty({ message: 'Community help request id cannot be empty or null' })
+  community_help_request_id: number;
+}
+
+export class TeamDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Title cannot be empty or null' })
+  title: string;
+
+  @IsNotEmpty({ message: 'Type cannot be empty or null' })
+  type: string;
+
+  @IsNotEmpty({ message: 'Task description cannot be empty or null' })
+  task_description: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+}
+
+export class CertificateDto {
+  @IsNotEmpty({ message: 'Id cannot be empty or null' })
+  id: number;
+
+  @IsNotEmpty({ message: 'Title cannot be empty or null' })
+  title: string;
+
+  @IsNotEmpty({ message: 'User id cannot be empty or null' })
+  user_id: number;
+}
+
+

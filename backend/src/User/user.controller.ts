@@ -15,10 +15,11 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
-  HttpCode,
+  HttpCode, Param,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
+  CommunityHelpRequestDto,
   ForgetPasswordDTO,
   OTP_ReceiverDTO,
   User_ProfileDTO,
@@ -168,6 +169,67 @@ export class UserController {
       return await this.userService.Show_My_Profile_Details(req.user.email);
     } catch (e) {
       throw new InternalServerErrorException(e.message);
+    }
+  }
+
+
+  @Post('/help_request/create')
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Create_Help_Request(
+    @Request() req,
+    @Body() helpReq: CommunityHelpRequestDto,
+  ): Promise<any> {
+    // console.log('Request Headers:', req.headers);
+    console.log('Request Headers:', req.headers);
+    try {
+      // console.log('User provided otp = ' + OTP_Object.otp);
+      const helpReqDto = await this.userService.Create_HelpRequest(req.user.email, helpReq);
+
+      if (helpReq !== null) {
+        console.log('Returning True');
+        return helpReqDto;
+      } else {
+        console.log('Returning Error');
+        throw new BadRequestException('Help request could not be sent!');
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
+
+  @Get('/help_request/:id') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Get_Single_Help_Request(@Request() req, @Param('id') id: string): Promise<any> {
+    console.log('Request Headers:', req.headers);
+    console.log('Requested ID:', id); // Log the extracted ID
+
+    try {
+      const helpRequestId = parseInt(id, 10); // Convert the ID to a number
+      if (isNaN(helpRequestId)) {
+        throw new BadRequestException('Invalid ID. ID is null');
+      }
+
+      // Fetch data using the helpRequestId (Replace this with actual logic)
+      const helpRequestDto = await this.userService.Get_Single_HelpRequest(helpRequestId);
+
+      if(helpRequestDto !== null) {
+        return helpRequestDto;
+      }else{
+        throw new NotFoundException(`Help request with ID ${id} not found`);
+      }
+
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Get Single Help Request Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
     }
   }
 
