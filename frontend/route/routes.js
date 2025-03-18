@@ -10,6 +10,7 @@ const routes = {
     create_user_profile: '/user/Create_Profile',
     show_my_profile: '/user/Profile',
     dashboard: '/user/Dashboard',
+    help_request: '/user/Help_Request',
 };
 
 export default routes;

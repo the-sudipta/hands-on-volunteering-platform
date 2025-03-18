@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { Core_Functions } from "@/pages/utils/core_functions";
 import routes from "@/route/routes";
 import { motion } from "framer-motion";
-import { FaUserCircle, FaChartPie, FaCogs, FaSignOutAlt, FaBell, FaMoon, FaSun } from "react-icons/fa";
+import {FaUserCircle, FaChartPie, FaCogs, FaSignOutAlt, FaBell, FaMoon, FaSun, FaHandsHelping} from "react-icons/fa";
 import API_ENDPOINTS from "@/route/api";
 import Spinner_Indicator from "@/pages/components/loading_indicator/Spinner_Indicator";
 import Success_Alert from "@/pages/components/toast/Success_Alert";
@@ -121,7 +121,7 @@ const Navigation = ({ children }) => {
             try {
 
                 const response = await Core_Functions.fetchData(API_ENDPOINTS.userProfile);
-                console.warn('Received Response in Navigation = ', response);
+                console.log('Received Response in Navigation = ', response);
                 if (!response) {
                     console.warn("User data is empty. Redirecting to login.");
                     console.warn("Here I should redirect to 500 Error Page.");
@@ -136,6 +136,7 @@ const Navigation = ({ children }) => {
                 // console.warn("Session expired. Redirecting to login.");
                 // show_Error('Session expired');
                 // quickly check if user data is available
+                await localStorage.removeItem("user_profile");
                 if (!checkUser() && localStorage.getItem("user") === null) {
                     console.warn("No authenticated user found. Redirecting to login.");
                     Core_Functions.navigate(router, routes.login);
@@ -188,8 +189,10 @@ const Navigation = ({ children }) => {
             if (response.data.success) {
                 await localStorage.setItem("user",null);
                 console.log('Local Storage Data = ',localStorage.getItem("user"));
+                await localStorage.removeItem("user_profile");
                 await logout();
                 Core_Functions.navigate(router, routes.login);
+                setIsLoading(false);
             } else {
                 Core_Functions.navigate(router, routes.dashboard);
             }
@@ -245,6 +248,16 @@ const Navigation = ({ children }) => {
                                     ${currentPage === routes.show_my_profile ? "bg-[rgb(55,65,81)] text-white shadow-lg" : "hover:bg-[rgb(55,65,81)] hover:text-white"}`}
                             >
                                 <FaCogs/> My Profile
+                            </motion.button>
+                        </li>
+                        <li>
+                            <motion.button
+                                whileHover={{scale: 1.05, x: 5}}
+                                onClick={() => Core_Functions.navigate(router, routes.help_request)}
+                                className={`flex items-center gap-3 w-full py-3 px-6 rounded-xl text-lg font-semibold transition-all duration-300 ease-in-out 
+                                    ${currentPage === routes.help_request ? "bg-[rgb(55,65,81)] text-white shadow-lg" : "hover:bg-[rgb(55,65,81)] hover:text-white"}`}
+                            >
+                                <FaHandsHelping/> Help Request
                             </motion.button>
                         </li>
                     </ul>

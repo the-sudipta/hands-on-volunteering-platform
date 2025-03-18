@@ -1,6 +1,8 @@
 import {useEffect, useState} from 'react';
 import axios from 'axios';
-import qs from "qs"; // Importing qs for URL encoding
+import qs from "qs";
+import {router} from "next/client";
+import routes from "@/route/routes"; // Importing qs for URL encoding
 
 
 
@@ -164,38 +166,60 @@ export const getCookie = (key) => {
 };
 
 export const fetchData = async (endpoint, useJson = true) => {
-    console.log("Public ENDPOINT:", process.env.NEXT_PUBLIC_API_ENDPOINT);
-    console.log("Specific ENDPOINT:", endpoint);
+    console.log("Public API ENDPOINT:", process.env.NEXT_PUBLIC_API_ENDPOINT);
+    console.log("Requested ENDPOINT:", endpoint);
 
-    // ✅ Correctly retrieve token from cookies
+    // Retrieve token
     let token = "";
-    if (document.cookie.includes("access_token=")) {
-        token = document.cookie
-            .split("; ")
-            .find(row => row.startsWith("access_token="))
-            .split("=")[1];
-    }
 
-    console.log("Token Before Sending the request:", token);
-
-    try {
-        const response = await axios.get(
-            process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
-            {
-                headers: {
-                    "Content-Type": useJson ? "application/json" : "application/x-www-form-urlencoded",
-                    "Authorization": `Bearer ${token}`,
-                },
-                withCredentials: true,
+    if (localStorage.getItem("authUser") !== null) {
+        const storedUser = localStorage.getItem("authUser");
+        if (storedUser) {
+            try {
+                token = JSON.parse(storedUser).jwt;
+            } catch (error) {
+                console.error("Error parsing JWT from localStorage:", error);
             }
-        );
-        console.log("Axios Response:", response.data);
-        return response;
-    } catch (error) {
-        console.error("Axios Error:", error.response?.data || error.message);
-        throw error;
+        }
+
+        // Debugging token
+        if (!token || token=== "") {
+            console.error("❌ No JWT token found! User may need to re-login.");
+            navigate(router, routes.login);
+        } else {
+            console.log("✅ Token Before Request:", token);
+        }
+
+        try {
+            const response = await axios.get(
+                process.env.NEXT_PUBLIC_API_ENDPOINT + endpoint,
+                {
+                    headers: {
+                        "Content-Type": useJson ? "application/json" : "application/x-www-form-urlencoded",
+                        "Authorization": `Bearer ${token}`,  // Ensure correct format
+                    },
+                    // Remove withCredentials if backend doesn’t require it
+                }
+            );
+            console.log("✅ Axios Response:", response.data);
+            return response;
+        } catch (error) {
+            console.error("❌ Axios Error:", error.response?.data || error.message);
+            navigate(router, routes.login);
+            // Handle Unauthorized (401) case explicitly
+            if (error.response?.status === 401) {
+                console.error("⚠️ Unauthorized! Token may be expired or invalid.");
+            }
+
+            throw error;
+        }
+    }else{
+
+        navigate(router, routes.login);
     }
+
 };
+
 
 
 //endregion Core Functions

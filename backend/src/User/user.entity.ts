@@ -194,7 +194,7 @@ export class AttendeeEntity {
 
 @Entity('comment')
 export class CommentEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true }) // Ensure auto-incrementing primary key
   id: number;
 
   @Column()

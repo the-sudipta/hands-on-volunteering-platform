@@ -12,6 +12,12 @@ const API_ENDPOINTS = {
     userProfileUpdate: "/api/user/profile/update",
     userForgetPassword: "/api/user/forget_password",
     userOTP: "/api/user/otp",
+    getAllHelpRequests: "/api/user/help_requests",
+    getSingleHelpRequests: "/api/user/help_request/:id",
+    getAllCommentsForSingleHelpRequest: "/api/user/help_request/:id/comments",
+    getUserFromComment: "/api/user/help_request/comment/:id/user",
+    getUserFromHelpRequest: "/api/user/help_request/:id/user",
+    postACommentForAHelpRequest: "/api/user/help_request/comment/post",
 };
 
 export default API_ENDPOINTS;

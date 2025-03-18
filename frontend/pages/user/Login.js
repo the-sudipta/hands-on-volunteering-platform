@@ -102,7 +102,11 @@ export default function Login() {
                 const response = await Core_Functions.submitForm(API_ENDPOINTS.userAuthLogin, formData, true);
                 if (response.data) {
                     login(await response.data.access_token, document.cookie);
+                    console.log('Access Token = ',await response.data.access_token);
+                    console.log('Document.cookie = ',await document.cookie);
                     await localStorage.setItem("user", JSON.stringify({ jwt: await response.data.access_token}));
+                    // Store in cookies (This is required!)
+                    // document.cookie = `access_token=${token}; path=/; Secure; SameSite=Lax`;
                     console.log(response.data);
                     setIsLoading(false);
                     show_Success("Login Successful");

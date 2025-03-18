@@ -15,14 +15,14 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
-  HttpCode, Param,
+  HttpCode, Param, Query, ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   CommentReceiverDto,
   CommunityHelpRequestDto,
   ForgetPasswordDTO,
-  OTP_ReceiverDTO,
+  OTP_ReceiverDTO, ShowCommentsRequestReceiverDto,
   User_ProfileDTO,
   UserDto,
 
@@ -183,7 +183,7 @@ export class UserController {
     @Body() helpReq: CommunityHelpRequestDto,
   ): Promise<any> {
     // console.log('Request Headers:', req.headers);
-    console.log('Request Headers:', req.headers);
+    // console.log('Request Headers:', req.headers);
     try {
       // console.log('User provided otp = ' + OTP_Object.otp);
       const helpReqDto = await this.userService.Create_HelpRequest(req.user.email, helpReq);
@@ -206,8 +206,8 @@ export class UserController {
   @UsePipes(new ValidationPipe())
   @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
   async Get_Single_Help_Request(@Request() req, @Param('id') id: string): Promise<any> {
-    console.log('Request Headers:', req.headers);
-    console.log('Requested ID:', id); // Log the extracted ID
+    // console.log('Request Headers:', req.headers);
+    // console.log('Requested ID:', id); // Log the extracted ID
 
     try {
       const helpRequestId = parseInt(id, 10); // Convert the ID to a number
@@ -234,12 +234,12 @@ export class UserController {
     }
   }
 
-  @Get('/help_request/') // Define the dynamic route with a parameter
+  @Get('/help_requests') // Define the dynamic route with a parameter
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
   @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
   async Get_All_Help_Requests(@Request() req): Promise<any> {
-    console.log('Request Headers:', req.headers);
+    // console.log('Request Headers:', req.headers);
     // console.log('Requested ID:', id); // Log the extracted ID
 
     try {
@@ -263,25 +263,24 @@ export class UserController {
     }
   }
 
-  @Get('/help_request/comments') // Define the dynamic route with a parameter
+  @Get('/help_request/:id/comments')
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
-  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
-  async Get_All_Comments_For_Single_Help_Request(@Request() req, id:number): Promise<any> {
-    console.log('Request Headers:', req.headers);
-    // console.log('Requested ID:', id); // Log the extracted ID
+  @HttpCode(HttpStatus.OK)
+  async Get_All_Comments_For_Single_Help_Request(
+    @Request() req,
+    @Param('id') helpRequestId: number
+  ): Promise<any> {
+
+    console.log('Requested ID:', helpRequestId);
 
     try {
-
-
-      const all_Comments = await this.userService.Get_All_Comments_By_Blog_Number(id);
+      const all_Comments = await this.userService.Get_All_Comments_By_Blog_Number(helpRequestId);
       if (all_Comments !== null) {
         return all_Comments;
-      }else {
-        throw new NotFoundException(`No Comments Found`);
+      } else {
+        return [];
       }
-
-
     } catch (e) {
       if (!(e instanceof NotFoundException)) {
         throw new InternalServerErrorException(
@@ -291,6 +290,8 @@ export class UserController {
       throw e; // Re-throw NotFoundException
     }
   }
+
+
 
   @Post('/help_request/comment/post') // Define the dynamic route with a parameter
   @UseGuards(AuthGuard)
@@ -323,7 +324,56 @@ export class UserController {
   }
 
 
+  @Get('/help_request/comment/:id/user') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Get_User_From_Comment_ID(@Request() req, @Param('id') commentID: number): Promise<any> {
+    // console.log('Request Headers:', req.headers);
+    console.log('Requested ID:', commentID); // Log the extracted ID
 
+    try {
+
+      // console.log('Request ID : ', receivedComment.community_help_request_id);
+
+      const user = await this.userService.Get_User_From_Comment_ID(commentID);
+      return user;
+
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Get User From Comment ID, Request Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
+    }
+  }
+
+
+
+  @Get('/help_request/:id/user') // Define the dynamic route with a parameter
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set status code to 200 (OK)
+  async Get_User_From_Help_Request_ID(@Request() req, @Param('id') helpRequestId: number): Promise<any> {
+    console.log('Requested ID:', helpRequestId);
+
+    try {
+      const all_Comments = await this.userService.Get_User_By_Blog_Number(helpRequestId);
+      if (all_Comments !== null) {
+        return all_Comments;
+      } else {
+        throw new NotFoundException(`No Comments Found`);
+      }
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) {
+        throw new InternalServerErrorException(
+          'User Service, Get All Comments for single Blog Error = ' + e.message,
+        );
+      }
+      throw e; // Re-throw NotFoundException
+    }
+  }
 
 
 

@@ -389,6 +389,65 @@ export class UserService {
     }
   }
 
+  async Get_User_From_Comment_ID(id: number): Promise<User_ProfileDTO | null> {
+    try {
+      const commentEntity = await this.commentRepository.findOne({
+        where: { id: id },
+        relations: ['user'],  // Load the related user entity
+      });
+
+      if (!commentEntity?.user) {
+        throw new NotFoundException('User not found for this comment');
+      }
+
+
+      const userEntity = await this.userRepository.findOneBy({email: commentEntity.user.email}) as UserEntity;
+      const profileEntity = await this.profileRepository.findOneBy({ user:  userEntity});
+
+      console.log('Profile Entity = ', profileEntity);
+
+      if (!profileEntity) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      const user_profile = await this.mapperService.entityToDto(profileEntity, User_ProfileDTO);
+      return user_profile;
+
+    } catch (error) {
+      throw new InternalServerErrorException('Error in Get_User_From_Comment_ID = ' + error.message);
+    }
+  }
+
+  async Get_User_By_Blog_Number(req_id: number): Promise<User_ProfileDTO | null> {
+    try {
+      const Help_ReqEntity = await this.commentRepository.findOne({
+        where: { id: req_id },
+        relations: ['user'],  // Load the related user entity
+      });
+
+      if (!Help_ReqEntity?.user) {
+        throw new NotFoundException('User not found for this comment');
+      }
+
+
+      const userEntity = await this.userRepository.findOneBy({email: Help_ReqEntity.user.email}) as UserEntity;
+      const profileEntity = await this.profileRepository.findOneBy({ user:  userEntity});
+
+      console.log('Profile Entity = ', profileEntity);
+
+      if (!profileEntity) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      const user_profile = await this.mapperService.entityToDto(profileEntity, User_ProfileDTO);
+      return user_profile;
+
+    } catch (error) {
+      throw new InternalServerErrorException('Error in Get_User_From_Comment_ID = ' + error.message);
+    }
+  }
+
+
   async Post_a_Comment_For_a_Blog(email: string, commentReceiverDtoDTO: CommentReceiverDto): Promise<CommentDto | null> {
     try {
       // Debugging: Log the received DTO

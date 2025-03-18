@@ -6,7 +6,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Column } from 'typeorm';
 
 // Signup Purpose My Profile
 export class UserDto {
@@ -208,6 +207,13 @@ export class CommentReceiverDto {
 
   @IsNotEmpty({ message: 'Community help request id cannot be empty or null' })
   community_help_request_id: number;
+}
+
+
+export class ShowCommentsRequestReceiverDto {
+  @IsNotEmpty({ message: 'ID cannot be empty or null' })
+  id:number;
+
 }
 
 
