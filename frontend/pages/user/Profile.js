@@ -144,43 +144,50 @@ export default function Profile() {
 
     return (
         <div className="p-6 max-w-4xl mx-auto transition-all duration-500">
-            <h1 className="text-3xl font-bold mb-4 text-center">My Profile</h1>
+            <h1 className="text-3xl font-bold mb-4 text-center text-gray-900 dark:text-white">My Profile</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Personal Details */}
-                <div
-                    className="p-6 rounded-xl shadow-lg transition-all duration-500 bg-gray-100 dark:bg-[rgb(31,41,55)]">
-                    <h2 className="text-xl font-semibold mb-4">Personal Details</h2>
+                <div className="p-6 rounded-xl shadow-lg transition-all duration-500 bg-white dark:bg-[rgb(31,41,55)]">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Personal Details</h2>
                     {Object.keys(formData).slice(1, 7).map((key) => (
                         <div key={key} className="mb-3">
-                            <label className="block text-sm font-medium mb-1 capitalize">{key}</label>
+                            <label
+                                className="block text-sm font-medium mb-1 capitalize text-gray-700 dark:text-gray-300">
+                                {key}
+                            </label>
                             {editMode ? (
                                 <input
                                     type="text"
                                     name={key}
                                     value={formData[key]}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2
+                            focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                 />
                             ) : (
-                                <p className="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-lg">{formData[key]}</p>
+                                <p className="bg-gray-50 text-gray-800 px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white">
+                                    {formData[key]}
+                                </p>
                             )}
                         </div>
                     ))}
                 </div>
 
                 {/* Volunteering Career */}
-                <div
-                    className="p-6 rounded-xl shadow-lg transition-all duration-500 bg-gray-100 dark:bg-[rgb(31,41,55)]">
-                    <h2 className="text-xl font-semibold mb-4">Volunteering Career</h2>
+                <div className="p-6 rounded-xl shadow-lg transition-all duration-500 bg-gray-900 dark:bg-gray-800">
+                    <h2 className="text-xl font-semibold mb-4 text-white">Volunteering Career</h2>
                     <ul className="space-y-2">
                         {Array.isArray(contributions) && contributions.length > 0 ? (
                             contributions.map((contribution, index) => (
-                                <li key={index} className="bg-gray-200 px-3 py-2 rounded-lg">
-                                    <strong>{contribution.title}</strong> - {contribution.time} at {contribution.location} ({contribution.contributed_time})
+                                <li key={index} className="bg-gray-700 px-3 py-2 rounded-lg text-white">
+                                    <strong className="text-blue-400">{contribution.title}</strong> -
+                                    <span
+                                        className="text-gray-300"> {contribution.time} at {contribution.location} </span>
+                                    <span className="text-green-400">({contribution.contributed_time})</span>
                                 </li>
                             ))
                         ) : (
-                            <p className="text-gray-500">No contributions found.</p>
+                            <p className="text-gray-400">No contributions found.</p>
                         )}
                     </ul>
                 </div>
@@ -212,5 +219,6 @@ export default function Profile() {
                 {Show_Error_Alert && <Error_Alert message={ErrorMessage}/>}
             </div>
         </div>
+
     );
 }
