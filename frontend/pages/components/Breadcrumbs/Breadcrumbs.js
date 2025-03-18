@@ -6,8 +6,7 @@ import routes from "@/route/routes";
 const breadcrumbMap = {
     [routes.user_dashboard]: { label: "Home", icon: <FaHome /> },
     [routes.help_request]: { label: "Help Requests" },
-    [routes.all_posts]: { label: "All Posts" },
-    [routes.create_post]: { label: "Create a Post" },
+    [routes.create_help_request]: { label: "Post Help Request" },
 };
 
 const Breadcrumbs = () => {

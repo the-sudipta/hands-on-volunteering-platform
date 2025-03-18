@@ -11,6 +11,7 @@ const routes = {
     show_my_profile: '/user/Profile',
     dashboard: '/user/Dashboard',
     help_request: '/user/Help_Request',
+    create_help_request: '/user/Create_Help_Request',
 };
 
 export default routes;

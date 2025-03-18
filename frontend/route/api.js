@@ -18,6 +18,7 @@ const API_ENDPOINTS = {
     getUserFromComment: "/api/user/help_request/comment/:id/user",
     getUserFromHelpRequest: "/api/user/help_request/:id/user",
     postACommentForAHelpRequest: "/api/user/help_request/comment/post",
+    createNewHelpRequest: "/api/user/help_request/create",
 };
 
 export default API_ENDPOINTS;

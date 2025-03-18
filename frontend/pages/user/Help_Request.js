@@ -137,6 +137,23 @@ export default function Help_Request() {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const suffix =
+            day % 10 === 1 && day !== 11
+                ? "st"
+                : day % 10 === 2 && day !== 12
+                    ? "nd"
+                    : day % 10 === 3 && day !== 13
+                        ? "rd"
+                        : "th";
+        return `${day}${suffix} ${date.toLocaleDateString("en-GB", {
+            month: "long",
+            year: "numeric",
+        })}`;
+    };
+
     const handleCommentSubmit = async (postId) => {
         console.log("Submitting comment for post", postId, newComments[postId]);
 
@@ -243,7 +260,10 @@ export default function Help_Request() {
                                 comments[showComments].map(comment => (
                                     <div key={comment.id} className="bg-gray-700 p-3 rounded-lg mb-2">
                                         <p className="text-gray-200">{comment.text}</p>
-                                        <p className="text-xs text-gray-400 mt-1">- {commentUserProfiles[comment.id] || "Unknown User"} • {comment.created_at}</p>
+                                        <p className="text-xs text-gray-400 mt-1 flex justify-between">
+                                            <span>- {commentUserProfiles[comment.id] || "Unknown User"}</span>
+                                            <span className="ml-auto">{formatDate(comment.time)}</span>
+                                        </p>
                                     </div>
                                 ))
                             ) : (
